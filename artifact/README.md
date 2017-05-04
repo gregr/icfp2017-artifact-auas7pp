@@ -22,3 +22,12 @@ To directly enter the REPL run: `docker run -it --rm scheme-repl`
 This runs the `scheme-repl` image in a container set up for interaction (`-it`) that will automatically be removed upon exit (`--rm`).
 
 To start a shell instead, run: `docker run -it --rm scheme-repl /bin/sh`
+
+
+## SHARE FILES (optional)
+
+To share a directory, use the `-v HOST-PATH:CONTAINER-PATH` option to map `HOST-PATH` to `CONTAINER-PATH` (note, absolute paths must be used).  If `HOST-PATH` doesn't already exist, it will automatically be created.
+
+For instance, to map the local directory `shared` (relative to the current path) to `/var/shared` on the container, run:
+
+`docker run -it --rm -v "$(pwd)"/shared:/var/shared scheme-repl /bin/sh`
