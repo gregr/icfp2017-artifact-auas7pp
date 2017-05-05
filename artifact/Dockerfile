@@ -26,4 +26,4 @@ RUN mkdir -p "$BUILD" && cd "$BUILD" \
  # Remove the build-only dependencies virtual package.
  && apk del .build-dependencies
 
-CMD ["scheme"]
+CMD ["/bin/sh"]
