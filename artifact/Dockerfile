@@ -26,4 +26,8 @@ RUN mkdir -p "$BUILD" && cd "$BUILD" \
  # Remove the build-only dependencies virtual package.
  && apk del .build-dependencies
 
+# Install some text editors.
+# (Space usage: nano ~1MB, vim ~23.2MB, emacs ~117MB)
+RUN apk add --no-cache nano vim emacs
+
 CMD ["/bin/sh"]
