@@ -6,27 +6,25 @@ Includes `==`, `=/=`, `symbolo`, and `numbero`. `absento` is included, but the a
 
 Eigen was removed.
 
-## Running
 
-### Racket
+## Using miniKanren
 
-```
-(require "mk.rkt")
-```
-
-### Vicare
+Run `scheme`, then load miniKanren with a path relative to your current directory.  From this directory, run:
 
 ```
-(load "mk-vicare.scm")
 (load "mk.scm")
 ```
 
+
 ## Running Tests
 
-After loading miniKanren as above,
+Run `scheme --script test-all.scm` from this directory.
+
+To interact with relational arithmetic, type inferencer, and interpreter, run `scheme` from this directory and load the appropriate files.
+
+For example, to load the interpreter and generate three quines, run the following in `scheme`:
 
 ```
-(load "test-all.scm")
+(load "evalo.scm")
+(run 3 (q) (evalo q q))
 ```
-
-regardless of scheme implementation.

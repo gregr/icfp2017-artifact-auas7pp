@@ -1,3 +1,6 @@
+(load "test-check.scm")
+(load "mk.scm")
+
 (define eval-expo
   (lambda (exp env val)
     (conde
@@ -34,8 +37,8 @@
 
 (test "running backwards"
   (run 5 (q) (eval-expo q '() '(closure y x ((x . (closure z z ()))))))
-  '(((lambda (x) (lambda (y) x)) (lambda (z) z))
-    ((lambda (x) (x (lambda (y) x))) (lambda (z) z))
+  '((((lambda (x) (lambda (y) x)) (lambda (z) z)))
+    (((lambda (x) (x (lambda (y) x))) (lambda (z) z)))
     (((lambda (x) (lambda (y) x))
       ((lambda (_.0) _.0) (lambda (z) z)))
      (sym _.0))
@@ -56,16 +59,16 @@
 
 (test "eval-exp-lc 1"
   (run* (q) (eval-expo '(((lambda (x) (lambda (y) x)) (lambda (z) z)) (lambda (a) a)) '() q))
-  '((closure z z ())))
+  '(((closure z z ()))))
 
 (test "eval-exp-lc 2"
   (run* (q) (eval-expo '((lambda (x) (lambda (y) x)) (lambda (z) z)) '() q))
-  '((closure y x ((x . (closure z z ()))))))
+  '(((closure y x ((x . (closure z z ())))))))
 
 (test "running backwards"
   (run 5 (q) (eval-expo q '() '(closure y x ((x . (closure z z ()))))))
-  '(((lambda (x) (lambda (y) x)) (lambda (z) z))
-    ((lambda (x) (x (lambda (y) x))) (lambda (z) z))
+  '((((lambda (x) (lambda (y) x)) (lambda (z) z)))
+    (((lambda (x) (x (lambda (y) x))) (lambda (z) z)))
     (((lambda (x) (lambda (y) x))
       ((lambda (_.0) _.0) (lambda (z) z)))
      (sym _.0))
@@ -102,5 +105,3 @@
       (closure _.2 _.3 ((_.1 . (closure _.1 (lambda (_.2) _.3) ())))))
      (=/= ((_.1 lambda)))
      (sym _.0 _.1 _.2))))
-
-
