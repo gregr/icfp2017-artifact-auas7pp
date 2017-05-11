@@ -77,7 +77,7 @@
                   (lambda (l s)
                     (if (null? l)
                       s
-                      (cons ,x (append (cdr l) s))))])
+                      (cons ,x (append (cdr l) s))))])  ;; Note the hole: ,x
          (list (append ,y '(c d e)) (append '(f g h) '(i j))))
       '((a b c d e) (f g h i j))))
   '((((car l) '(a b)))))
