@@ -45,6 +45,8 @@
                             ((eval-expr rator env)
                              (eval-expr rand env))]))])
              (eval-expr ',q
+                        ;; 'initial-env represents the empty environment.  A
+                        ;; syntactically correct program will never access it.
                         'initial-env)))
         q))
     '((((lambda (_.0) `(,_.0 ',_.0))
