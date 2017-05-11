@@ -25,7 +25,15 @@
   (run* (q) (appendo '(a b c) '(d e) q))
   '(((a b c d e))))
 
-(test 'appendo-backward
+(test 'appendo-backward-1
+  (run* (q) (appendo q '(d e) '(a b c d e)))
+  '(((a b c))))
+
+(test 'appendo-backward-2
+  (run* (q) (appendo '(a b) q '(a b c d e)))
+  '(((c d e))))
+
+(test 'appendo-backward-3
   (run* (x y) (appendo x y '(a b c d e)))
   '(((() (a b c d e)))
     (((a) (b c d e)))

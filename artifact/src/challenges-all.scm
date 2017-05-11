@@ -1,5 +1,8 @@
 ;; For your safety, this does not run: challenge-2-extra-slow.scm
 
+(printf "Running introductory examples\n")
+(load "intro-examples.scm")
+
 (printf "Running Challenge 1\n")
 (load "challenge-1.scm")
 
