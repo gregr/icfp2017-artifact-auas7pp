@@ -86,7 +86,7 @@
 (load "evalo-optimized.scm")
 (set! allow-incomplete-search? #t)
 
-(test 'append-synthesis-1
+(test 'append-synthesis-insufficient-1
   (run 1 (defn)
     (fresh (body)
       (== defn `(append (lambda (xs ys) ,body)))
@@ -101,7 +101,7 @@
            ys
            '(1 2)))))))
 
-(test 'append-synthesis-2
+(test 'append-synthesis-insufficient-2
   (run 1 (defn)
     (fresh (body)
       (absento 1 defn) (absento 2 defn)
@@ -119,7 +119,7 @@
 
 (printf "Be patient, the next one takes a little longer.\n")
 (time
-  (test 'append-synthesis-3
+  (test 'append-synthesis-fully-general
     (run 1 (defn)
       (fresh (body)
         (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
@@ -140,7 +140,7 @@
                (cons (car xs) (append (cdr xs) ys))))))))))
 
 (time
-  (test 'append-synthesis-4
+  (test 'append-synthesis-using-fold-right
     (run 1 (defn)
       (fresh (body)
         (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
@@ -167,7 +167,7 @@
 ;; demonstrate the synthesis of a simpler definition of append by focusing on
 ;; the most interesting examples.
 
-(printf "This one is about 10x faster than append-synthesis-3.\n")
+(printf "This one is about 10x faster than append-synthesis-fully-general.\n")
 (time
   (test 'append-synthesis-faster-1
     (run 1 (defn)
@@ -208,3 +208,56 @@
            (if (null? xs)
              ys
              (cons (car xs) (append (cdr xs) ys)))))))))
+
+
+;; We can also play other interesting games, such as indirectly synthesizing
+;; fold-right given a definition of append that uses it.
+
+(time
+  (test 'fold-right-synthesis-given-append
+    (run 1 (defn)
+      (fresh (body)
+        (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
+        (== defn `(fold-right (lambda (f acc xs) ,body)))
+        (evalo
+          `(letrec (,defn)
+             ;; We nest letrec expressions to prevent cheating.
+             (letrec ((append
+                        (lambda (xs ys)
+                          (fold-right cons ys xs))))
+               (list (append '() '())
+                     (append '(1) '(2))
+                     (append '(1 2) '(3 4)))))
+          `(() (1 2) (1 2 3 4)))))
+    '(((fold-right
+         (lambda (f acc xs)
+           (if (null? xs)
+             acc
+             (f (car xs) (fold-right f acc (cdr xs))))))))))
+
+
+;; This idea of indirect synthesis is useful for more than just games.  For
+;; instance, we can synthesize an efficient definition of reverse by
+;; hypothesizing the existence of an accumulator-passing algorithm, and
+;; defining reverse in terms of it.
+
+(time
+  (test 'reverse-accumulator-passing
+    (run 1 (defn)
+      (fresh (body)
+        (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
+        (== defn `(reverse-acc (lambda (xs acc) ,body)))
+        (evalo
+          `(letrec ((reverse
+                      (lambda (xs)
+                        (reverse-acc xs '())))
+                    ,defn)
+             (list (reverse '())
+                   (reverse '(1))
+                   (reverse '(1 2))))
+          '(() (1) (2 1)))))
+    '(((reverse-acc
+         (lambda (xs acc)
+           (if (null? xs)
+             acc
+             (reverse-acc (cdr xs) (cons (car xs) acc)))))))))
