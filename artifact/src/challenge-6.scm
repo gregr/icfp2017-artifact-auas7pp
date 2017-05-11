@@ -294,7 +294,7 @@
           (((B => C) ((B => C) A (A => B) (B => C)) assumption ())))
          ((B => C) (A (A => B) (B => C)) assumption ())))))))
 
-(define file-name "challenge-6-generated-conclusions.scm")
+(define file-name "challenge-6-generated-theorems.scm")
 (if (file-exists? file-name)
   (printf "Delete ~s if you'd like to regenerate it.\n" file-name)
   (begin
@@ -310,4 +310,4 @@
                 ;; given no assumptions, what conclusions can we prove?
                 (== prf `(,conclusion () . ,body))
                 (proof?-evalo prf #t)))))))
-    (printf "Generated conclusions written to: ~s\n" file-name)))
+    (printf "Generated theorems written to: ~s\n" file-name)))
