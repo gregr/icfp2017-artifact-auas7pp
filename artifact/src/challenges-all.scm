@@ -14,3 +14,6 @@
 
 (printf "Running Challenge 4\n")
 (load "challenge-4.scm")
+
+(printf "Running Challenge 5\n")
+(load "challenge-5.scm")
