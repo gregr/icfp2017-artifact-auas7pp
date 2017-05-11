@@ -210,6 +210,34 @@
              (cons (car xs) (append (cdr xs) ys)))))))))
 
 
+;; It's also possible to synthesize all of append from scratch, including
+;; figuring out the parameter list.  The downside is that the output is
+;; somewhat harder to read since the parameter names could be almost anything,
+;; and are therefore represented by constrained logic variables.
+
+(time
+  (test 'append-synthesis-from-scratch
+    (run 1 (defn)
+      (fresh (body)
+        (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
+        ;(== defn `(append (lambda (xs ys) ,body)))  ;; This is the difference.
+        (evalo
+          `(letrec (,defn)
+             (list (append '() '())
+                   (append '(1) '(2))
+                   (append '(1 2) '(3 4))))
+          '(() (1 2) (1 2 3 4)))))
+    '(((append
+         (lambda (_.0 _.1)
+           (if (null? _.0)
+             _.1
+             (cons (car _.0) (append (cdr _.0) _.1)))))
+       (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 car)) ((_.0 cdr)) ((_.0 cons))
+            ((_.0 if)) ((_.0 null?)) ((_.1 append)) ((_.1 car)) ((_.1 cdr))
+            ((_.1 cons)) ((_.1 if)) ((_.1 null?)))
+       (sym _.0 _.1)))))
+
+
 ;; We can also play other interesting games, such as indirectly synthesizing
 ;; fold-right given a definition of append that uses it.
 
