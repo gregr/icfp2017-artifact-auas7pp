@@ -32,4 +32,7 @@ RUN apk add --no-cache nano
 RUN apk add --no-cache vim
 RUN apk add --no-cache emacs
 
+WORKDIR /artifact
+COPY src .
+
 CMD ["/bin/sh"]
