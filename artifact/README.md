@@ -10,27 +10,29 @@ Instructions for OSX El Capitan and later:
 
 ## BUILD IMAGE
 
-From this directory (it has the Dockerfile) run `docker build -t scheme-repl .`
+From this directory (it has the Dockerfile) run `docker build -t artifact .`
 
-This creates the `scheme-repl` image.
+This creates the `artifact` image.
 
 
 ## RUN
 
-To enter a shell, run: `docker run -it --rm scheme-repl`
+To enter a shell, run: `docker run -it --rm artifact`
 
-This runs the `scheme-repl` image in a container set up for interaction (`-it`) that will automatically be removed upon exit (`--rm`).
+This runs the `artifact` image in a container set up for interaction (`-it`) that will automatically be removed upon exit (`--rm`).
 
-To directly enter the REPL run: `docker run -it --rm scheme-repl scheme`
+To directly enter the REPL run: `docker run -it --rm artifact scheme`
 
 
 ## SHARE FILES (optional)
+
+The image is built with minimal installations of nano, vim, and emacs, to allow editing files directly in a running container.  But if you'd prefer to edit files locally, you can ferry them across a directory shared with the host system.
 
 To share a directory, use the `-v HOST-PATH:CONTAINER-PATH` option to map `HOST-PATH` to `CONTAINER-PATH` (note, absolute paths must be used).  If `HOST-PATH` doesn't already exist, it will automatically be created.
 
 For instance, to map the local directory `shared` (relative to the current path) to `/var/shared` on the container, run:
 
-`docker run -it --rm -v "$(pwd)"/shared:/var/shared scheme-repl`
+`docker run -it --rm -v "$(pwd)"/shared:/var/shared artifact`
 
 
 ## RUNNING
