@@ -31,3 +31,8 @@ To share a directory, use the `-v HOST-PATH:CONTAINER-PATH` option to map `HOST-
 For instance, to map the local directory `shared` (relative to the current path) to `/var/shared` on the container, run:
 
 `docker run -it --rm -v "$(pwd)"/shared:/var/shared scheme-repl`
+
+
+## RUNNING
+
+Look in `src/README.md` for more instructions.

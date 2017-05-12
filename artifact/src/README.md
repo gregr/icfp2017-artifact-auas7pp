@@ -1,3 +1,18 @@
-To run challenges, enter `scheme --script challenges-all.scm`.
+## Validate Challenge Examples
 
-Otherwise, feel free to enter `scheme` and load the various forms of `evalo` for interactive use.
+To validate examples related to the challenges from the paper, enter `scheme --script challenges-all.scm`.
+
+Modify the challenge files (named `challenge-[1-7].scm`) if you'd like to consider variations on the provided examples.
+
+
+## Freestyle Interaction
+
+Enter `scheme` and load an `evalo` definition of your choice for interactive use (each lives in a separate `evalo-X.scm` file).
+
+When using `evalo-optimized` for synthesis, you should probably also run:
+
+```
+(set! allow-incomplete-search? #t)
+```
+
+Of course, do not set this if you intend to prove that there are a finite number of answers to your query.
