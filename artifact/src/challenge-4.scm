@@ -270,7 +270,7 @@
 ;; defining reverse in terms of it.
 
 (time
-  (test 'reverse-accumulator-passing
+  (test 'reverse-accumulator-passing-synthesis
     (run 1 (defn)
       (fresh (body)
         (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
@@ -289,3 +289,54 @@
            (if (null? xs)
              acc
              (reverse-acc (cdr xs) (cons (car xs) acc)))))))))
+
+
+;; We can also perform synthesis using fancier examples, such as equalities.
+
+(time
+  (test 'append-synthesis-equalities-1
+    (run 1 (defn)
+      (fresh (body)
+        (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
+        (evalo
+          `(letrec (,defn)
+             (list
+               (equal? '() (append '() '()))
+               (equal? (append '(1) '(2)) '(1 2))
+               (equal? '(1 2 3 4) (append '(1 2) '(3 4)))))
+          (list #t #t #t))))
+    '(((append
+         (lambda (_.0 _.1)
+           (if (null? _.0)
+             _.1
+             (cons (car _.0) (append (cdr _.0) _.1)))))
+       (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 car)) ((_.0 cdr)) ((_.0 cons))
+            ((_.0 if)) ((_.0 null?)) ((_.1 append)) ((_.1 car)) ((_.1 cdr))
+            ((_.1 cons)) ((_.1 if)) ((_.1 null?)))
+       (sym _.0 _.1)))))
+
+;; These equalities can involve nontrivial evaluation on both sides, enabling a
+;; form of algebraic property-based specification.
+
+(time
+  (test 'append-synthesis-equalities-2
+    (run 1 (defn)
+      (fresh (body)
+        (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
+        (evalo
+          `(letrec (,defn)
+             (list
+               (equal? (cons 1 (append '() 2)) (append (cons 1 '()) 2))
+               (equal? (cons 1 (append '(2) 3)) (append (cons 1 '(2)) 3))
+               (equal? (append '(1) '(2 . 3)) (append '(1 2) 3))
+               (equal? (append '(1) (append '(2) 3)) (append (append '(1) '(2)) 3))))
+          (list #t #t #t #t))))
+    '(((append
+         (lambda (_.0 _.1)
+           (if (null? _.0)
+             _.1
+             (cons (car _.0) (append (cdr _.0) _.1)))))
+       (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 car)) ((_.0 cdr)) ((_.0 cons))
+            ((_.0 if)) ((_.0 null?)) ((_.1 append)) ((_.1 car)) ((_.1 cdr))
+            ((_.1 cons)) ((_.1 if)) ((_.1 null?)))
+       (sym _.0 _.1)))))
