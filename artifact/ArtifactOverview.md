@@ -28,18 +28,9 @@ This runs the `artifact35-auas7pp` image in a container set up for interaction (
 After exiting, this container's state will persist.  To instead start a new throwaway container (it removes itself after exiting), add the `--rm` flag, running: `docker run -it --rm artifact35-auas7pp`
 
 
-### Manipulate existing containers (optional)
-
-You will need to know the container's name.  View the names of all your containers by running: `docker ps -a`
-
-To restart and re-enter an exited container, run: `docker start -ia CONTAINER-NAME`
-
-To remove an exited container, run: `docker rm CONTAINER-NAME`
-
-
 ### Share files with a container (optional)
 
-This is optional, but sharing a directory with the host system is encouraged in order to preserve any generated or edited files from the artifact.
+This is optional, but sharing a directory with the host system is strongly encouraged in order to preserve any edited or generated files (such as the test output log).
 
 The image is built with minimal installations of nano, vim, and emacs, to allow editing files directly in a running container.  But if you'd prefer to manipulate files locally, you can ferry them across a shared directory.
 
@@ -49,9 +40,20 @@ For instance, to map the host directory `shared` (relative to the current path) 
 
 `docker run -it -v "$(pwd)"/shared:/artifact/shared artifact35-auas7pp`
 
-To run with a throwaway container instead, run:
+This assumes you're in a bash-like environment, and can use `"$(pwd)"` to retrieve the current directory.
+
+To run with a throwaway container instead, add the `--rm` flag, running:
 
 `docker run -it --rm -v "$(pwd)"/shared:/artifact/shared artifact35-auas7pp`
+
+
+### Manipulate existing containers (optional)
+
+You will need to know the container's name to manipulate it.  Containers are given arbitrary names when they're first created.  View the names of all your containers by running: `docker ps -a`
+
+To restart and re-enter an exited container, run: `docker start -ia CONTAINER-NAME`
+
+To remove an exited container, run: `docker rm CONTAINER-NAME`
 
 
 ### Start the challenge test suite
