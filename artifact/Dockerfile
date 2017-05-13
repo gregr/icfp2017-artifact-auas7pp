@@ -27,7 +27,7 @@ RUN mkdir -p "$BUILD" && cd "$BUILD" \
  && apk del .build-dependencies
 
 # Optionally install text editors.  You can comment out anything you don't use.
-# (Space usage: nano ~1MB, vim ~23.2MB, emacs ~117MB)
+# (Space usage: nano ~0.4MB, vim ~23.4MB, emacs ~118MB)
 RUN apk add --no-cache nano
 RUN apk add --no-cache vim
 RUN apk add --no-cache emacs
