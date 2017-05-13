@@ -65,11 +65,9 @@ These tests may take some time to complete (currently about 10 minutes).  While 
 
 ### Validate the test suite run once it has completed
 
-Look over the test output log to verify that there are no failures.  Failures are loud and obnoxious, so they should be easy to spot.
+Look over the test output log to verify that there are no failures.  Failures are loud and obnoxious, so they should be easy to spot.  If you haven't edited any of the tests or implementations, there should be no failures.
 
-The tests for challenge 1 also generate a large number of expressions that are written to a file.  To sanity check them, run: `diff generated-by-challenge-1.scm expected-generation-by-challenge-1.scm`
-
-If you haven't edited any of the tests or implementations, there should be no differences.  If you've made changes, it could affect the order in which answers appear without being incorrect, but these differences will show up.
+If you've made changes, it could affect the order in which correct answers appear.  In fact, completely different, but still correct, answers could show up.  These differences will still be flagged as test failures even if there isn't really a problem.  You'll have to look at the output carefully to determine if this is the case.
 
 
 ## Step-by-Step evaluation insructions
@@ -79,8 +77,6 @@ If you haven't edited any of the tests or implementations, there should be no di
 Each challenge file corresponds to a numbered section of the paper, testing each of its examples.  Some files contain an extended set of examples, demonstrating variations and capabilities that we didn't have space for in the paper.
 
 Most examples are run as tests, and appear with their expected output.  The meatier examples are also timed to assess performance.  Any test failures will appear loud and clear in the test run output.  When applicable, timings will also appear, along with other resource usage statistics.
-
-The examples that aren't run as tests are set up to write their output to file, for manual investigation.  This is because their outputs are large.  You'll see the names of these files in the test run output.
 
 
 #### Challenge 1

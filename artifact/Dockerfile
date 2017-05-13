@@ -34,7 +34,7 @@ RUN apk add --no-cache emacs
 
 WORKDIR /artifact
 COPY src/mk/LICENSE src/mk/README.md src/mk/*.scm ./mk/
-COPY src/evalo-*.scm src/intro-examples.scm src/expected-generation-by-challenge-1.scm src/challenge-*.scm src/all-challenges.scm ./
+COPY src/evalo-*.scm src/intro-examples.scm src/love-in-99k-ways.scm src/challenge-*.scm src/all-challenges.scm ./
 COPY ArtifactOverview.md ./
 
 CMD ["/bin/sh"]
