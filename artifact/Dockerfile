@@ -33,7 +33,8 @@ RUN apk add --no-cache vim
 RUN apk add --no-cache emacs
 
 WORKDIR /artifact
-COPY src .
-COPY ArtifactOverview.md README.md
+COPY src/mk/LICENSE src/mk/README.md src/mk/*.scm ./mk/
+COPY src/*.scm ./
+COPY ArtifactOverview.md ./
 
 CMD ["/bin/sh"]
