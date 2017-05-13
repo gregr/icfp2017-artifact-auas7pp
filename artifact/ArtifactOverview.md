@@ -67,7 +67,9 @@ These tests may take some time to complete (currently about 10 minutes).  While 
 
 Look over the test output log to verify that there are no failures.  Failures are loud and obnoxious, so they should be easy to spot.
 
-The output will also mention the names of a few generated files, `generated-by-challenge-N.scm` for some N.  Review these files to sanity check them.
+The tests for challenge 1 also generate a large number of expressions that are written to a file.  To sanity check them, run: `diff generated-by-challenge-1.scm expected-generation-by-challenge-1.scm`
+
+If you haven't edited any of the tests or implementations, there should be no differences.  If you've made changes, it could affect the order in which answers appear without being incorrect, but these differences will show up.
 
 
 ## Step-by-Step evaluation insructions
