@@ -34,5 +34,6 @@ RUN apk add --no-cache emacs
 
 WORKDIR /artifact
 COPY src .
+COPY ArtifactOverview.md README.md
 
 CMD ["/bin/sh"]
