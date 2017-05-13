@@ -14,6 +14,31 @@
      (=/= ((_.0 _.1)) ((_.0 lambda))) (num _.2) (sym _.0 _.1))))
 
 (time
+  (test 'dynamic-then-lexical-3-expressions
+    (run 3 (expr)
+      (eval-dyno expr 137)
+      (eval-lexo expr 42))
+    '((((lambda (_.0) (((lambda (_.0) (lambda (_.1) _.0)) 42) _.2)) 137)
+       (=/= ((_.0 _.1)) ((_.0 lambda))) (num _.2) (sym _.0 _.1))
+      (((lambda (_.0) ((lambda (_.1) ((lambda (_.0) (_.1 _.2)) 137)) (lambda (_.3) _.0))) 42)
+       (=/= ((_.0 _.1)) ((_.0 _.3)) ((_.0 lambda)) ((_.1 lambda))) (num _.2) (sym _.0 _.1 _.3))
+      (((lambda (_.0) (((lambda (_.0) (lambda (_.1) ((lambda (_.2) _.0) _.3))) 42) _.4)) 137)
+       (=/= ((_.0 _.1)) ((_.0 _.2)) ((_.0 lambda)) ((_.1 lambda))) (num _.3 _.4) (sym _.0 _.1 _.2)))))
+
+(printf "Notice how much slower this run is.\n")
+(time
+  (test 'lexical-then-dynamic-3-expressions
+    (run 3 (expr)
+      (eval-lexo expr 42)
+      (eval-dyno expr 137))
+    '((((lambda (_.0) (((lambda (_.0) (lambda (_.1) _.0)) 42) _.2)) 137)
+       (=/= ((_.0 _.1)) ((_.0 lambda))) (num _.2) (sym _.0 _.1))
+      (((lambda (_.0) ((lambda (_.1) ((lambda (_.0) (_.1 _.2)) 137)) (lambda (_.3) _.0))) 42)
+       (=/= ((_.0 _.1)) ((_.0 _.3)) ((_.0 lambda)) ((_.1 lambda))) (num _.2) (sym _.0 _.1 _.3))
+      (((lambda (_.0) (((lambda (_.0) (lambda (_.1) ((lambda (_.2) _.0) _.3))) 42) _.4)) 137)
+       (=/= ((_.0 _.1)) ((_.0 _.2)) ((_.0 lambda)) ((_.1 lambda))) (num _.3 _.4) (sym _.0 _.1 _.2)))))
+
+(time
   (test 'dynamic-and-lexical-100-expressions
     (run 100 (expr)
       (eval-dyno expr 137)
