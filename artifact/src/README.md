@@ -1,6 +1,6 @@
 ## Validate Challenge Examples
 
-To validate examples related to the challenges from the paper, enter `scheme --script challenges-all.scm`.
+To validate examples related to the challenges from the paper, enter `scheme --script all-challenges.scm`.
 
 Some of the challenge examples write their output to file for more convenient examination.  The names of these files will be displayed during the validation run, and will be of the form `challenge-[1-7]-generated-X.scm`.
 
