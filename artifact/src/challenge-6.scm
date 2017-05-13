@@ -295,19 +295,17 @@
          ((B => C) (A (A => B) (B => C)) assumption ())))))))
 
 (define file-name "generated-by-challenge-6.scm")
-(if (file-exists? file-name)
-  (printf "Delete ~s if you'd like to regenerate it.\n" file-name)
-  (begin
-    (printf "Find 50 theorems provable in our logic.\n")
-    (printf "Give it a minute or so.\n")
-    (time
-      (with-output-to-file
-        file-name
-        (lambda ()
-          (pretty-print
-            (run 50 (conclusion)
-              (fresh (prf body)
-                ;; given no assumptions, what conclusions can we prove?
-                (== prf `(,conclusion () . ,body))
-                (proof?-evalo prf #t)))))))
-    (printf "Generated theorems written to: ~s\n" file-name)))
+(printf "Find 50 theorems provable in our logic.\n")
+(printf "Give it a minute or so.\n")
+(time
+  (with-output-to-file
+    file-name
+    (lambda ()
+      (pretty-print
+        (run 50 (conclusion)
+          (fresh (prf body)
+            ;; given no assumptions, what conclusions can we prove?
+            (== prf `(,conclusion () . ,body))
+            (proof?-evalo prf #t)))))
+    'replace))
+(printf "Generated theorems written to: ~s\n" file-name)
