@@ -1,6 +1,6 @@
 # Functional Pearl: A Unified Approach to Solving Seven Programming Problems
 
-This file explains how to build and optionally archive the Docker image `artifact35-AUAS7PP` if you don't already have one.  Read `ArtifactOverview.md` to use an existing image.
+This file explains how to build and optionally archive the Docker image `artifact35-auas7pp` if you don't already have one.  Read `ArtifactOverview.md` to use an existing image.
 
 
 ## Install Docker
@@ -14,13 +14,13 @@ Once installed, verify that things are working by running: `docker run --rm hell
 
 ## Build image
 
-From this directory (it has the Dockerfile) run `docker build -t artifact35-AUAS7PP .`
+From this directory (it has the Dockerfile) run `docker build -t artifact35-auas7pp .`
 
-This creates the `artifact35-AUAS7PP` image.
+This creates the `artifact35-auas7pp` image.
 
 
 ## Save image to archive file (optional)
 
-Once you've built the image, you can save it to an archive file for distribution by running: `docker save -o artifact35-AUAS7PP.tar`
+Once you've built the image, you can save it to an archive file for distribution by running: `docker save -o artifact35-auas7pp.tar`
 
-Given an image archive with the same name, you can import it by running: `docker load -i artifact35-AUAS7PP.tar`
+Given an image archive with the same name, you can import it by running: `docker load -i artifact35-auas7pp.tar`

@@ -16,16 +16,16 @@ Once installed, verify that things are working by running: `docker run --rm hell
 
 ### Load the Docker image
 
-Load the archived image into Docker by running: `docker load -i artifact35-AUAS7PP.tar`
+Load the archived image into Docker by running: `docker load -i artifact35-auas7pp.tar`
 
 
 ### Start a new container
 
-To start a new container, run: `docker run -it artifact35-AUAS7PP`
+To start a new container, run: `docker run -it artifact35-auas7pp`
 
-This runs the `artifact35-AUAS7PP` image in a container set up for interaction (`-it`).
+This runs the `artifact35-auas7pp` image in a container set up for interaction (`-it`).
 
-After exiting, this container's state will persist.  To instead start a new throwaway container (it removes itself after exiting), add the `--rm` flag, running: `docker run -it --rm artifact35-AUAS7PP`
+After exiting, this container's state will persist.  To instead start a new throwaway container (it removes itself after exiting), add the `--rm` flag, running: `docker run -it --rm artifact35-auas7pp`
 
 
 ### Manipulate existing containers (optional)
@@ -45,7 +45,7 @@ To share a directory, use the `-v HOST-PATH:CONTAINER-PATH` option to map `HOST-
 
 For instance, to map the host directory `shared` (relative to the current path) to `/var/shared` on the container, run:
 
-`docker run -it --rm -v "$(pwd)"/shared:/var/shared artifact35-AUAS7PP`
+`docker run -it --rm -v "$(pwd)"/shared:/var/shared artifact35-auas7pp`
 
 
 ## Step-by-Step evaluation insructions
