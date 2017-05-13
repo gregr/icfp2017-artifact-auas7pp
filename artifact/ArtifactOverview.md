@@ -54,16 +54,23 @@ To run with a throwaway container instead, run:
 `docker run -it --rm -v "$(pwd)"/shared:/artifact/shared artifact35-auas7pp`
 
 
-## Step-by-Step evaluation insructions
-
 ### Start the challenge test suite
 
 Once in a container, start the test suite by running: `scheme --script all-challenges.scm | tee test-output.log`
 
 The log is displayed as the tests run, but it will also be written to the file `test-output.log` in case you'd like to reference it later.  If you're willing to share a directory with the host, it's a good idea to copy this (and any other generated or edited files) to that directory once the tests finish, for backup.
 
-These tests may take some time to complete (currently about 10 minutes).  While the tests are running, make efficient use of your time by starting another container to continue exploring.  Multiple containers for the same image can safely be running at the same time without interfering with each other, as each one maintains its own state, including an independent file system (aside from any explicit sharing you've set up).
+These tests may take some time to complete (currently about 10 minutes).  While the tests are running, make efficient use of your time by starting another container if you'd like to continue with the "Step-by-Step" section.  Multiple containers for the same image can safely be running at the same time without interfering with each other, as each one maintains its own state, including an independent file system (aside from any explicit sharing you've set up).
 
+
+### Validate the test suite run once it has completed
+
+Look over the test output log to verify that there are no failures.  Failures are loud and obnoxious, so they should be easy to spot.
+
+The output will also mention the names of a few generated files, `generated-by-challenge-N.scm` for some N.  Review these files to sanity check them.
+
+
+## Step-by-Step evaluation insructions
 
 ### Review the challenge files
 
@@ -113,15 +120,6 @@ Use a proof-checking function as an automated theorem prover for free.  We choos
 Generate a quine that uses quasiquote instead of list or cons, even if the host language doesn't support it.  In Scheme, we define a small interpreter that does support quasiquote, then run it relationally within `evalo`.
 
 
-### Validate the test suite run once it has completed
-
-Look over the test run output to verify that there are no test failures.  Failures are loud and obnoxious, so they should be easy to spot.
-
-The output will also mention the names of a few generated files, `generated-by-challenge-N.scm` for some N.  Review these files to sanity check them.
-
-Edit and re-run some examples to validate output (e.g. intentionally change queries or their expected outputs to break tests and see their output for yourself).  Each challenge may be run independently: `scheme --script challenge-N.scm` for any N in {1..7}
-
-
 ### Continue exploring
 
 #### Review the relational interpreter implementations
@@ -132,6 +130,11 @@ We've included a few versions of the relational interpreter (`evalo`).
 * `evalo-small.scm`, which supports fewer language constructs than the standard interpreter, reducing the branching factor, improving performance when generating quines, twines, and thrines.
 * `evalo-standard.scm`, implementing a reasonable subset of pure Scheme.
 * `evalo-optimized.scm`, containing a more complicated implementation of the standard interpreter with several optimizations.
+
+
+#### Try your own examples
+
+Edit and re-run some examples to validate output (e.g. intentionally change queries or their expected outputs to break tests and see their output for yourself).  Each challenge may be run independently: `scheme --script challenge-N.scm` for any N in {1..7}
 
 
 #### Freestyle interaction
