@@ -13,7 +13,7 @@
       137)
      (=/= ((_.0 _.1)) ((_.0 lambda))) (num _.2) (sym _.0 _.1))))
 
-(define file-name "challenge-3-generated-expressions.scm")
+(define file-name "generated-by-challenge-3.scm")
 (if (file-exists? file-name)
   (printf "Delete ~s if you'd like to regenerate it.\n" file-name)
   (begin

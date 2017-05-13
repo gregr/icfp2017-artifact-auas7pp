@@ -294,7 +294,7 @@
           (((B => C) ((B => C) A (A => B) (B => C)) assumption ())))
          ((B => C) (A (A => B) (B => C)) assumption ())))))))
 
-(define file-name "challenge-6-generated-theorems.scm")
+(define file-name "generated-by-challenge-6.scm")
 (if (file-exists? file-name)
   (printf "Delete ~s if you'd like to regenerate it.\n" file-name)
   (begin

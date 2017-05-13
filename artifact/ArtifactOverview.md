@@ -109,7 +109,7 @@ Generate a quine that uses quasiquote instead of list or cons, even if the host 
 
 Look over the test run output to verify that there are no test failures.  Failures are loud and obnoxious, so they should be easy to spot.
 
-The output will also mention the names of a few generated files.  Review these files to sanity check them.
+The output will also mention the names of a few generated files, `generated-by-challenge-N.scm` for some N.  Review these files to sanity check them.
 
 Edit and re-run some examples to validate output (e.g. intentionally change queries or their expected outputs to break tests and see their output for yourself).  Each challenge may be run independently: `scheme --script challenge-N.scm` for any N in {1..7}
 

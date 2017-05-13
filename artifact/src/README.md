@@ -2,7 +2,7 @@
 
 To validate examples related to the challenges from the paper, enter `scheme --script all-challenges.scm`.
 
-Some of the challenge examples write their output to file for more convenient examination.  The names of these files will be displayed during the validation run, and will be of the form `challenge-[1-7]-generated-X.scm`.
+Some of the challenge examples write their output to file for more convenient examination.  The names of these files will be displayed during the validation run, and will be of the form `generated-by-challenge-[1-7].scm`.
 
 If you'd like to consider variations on the provided examples, or intentionally break the tests, modify the challenge files (named `challenge-[1-7].scm`).
 

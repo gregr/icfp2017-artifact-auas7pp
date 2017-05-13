@@ -5,7 +5,7 @@
   (run 1 (q) (evalo q '(I love you)))
   '(('(I love you))))
 
-(define file-name "challenge-1-generated-expressions.scm")
+(define file-name "generated-by-challenge-1.scm")
 (if (file-exists? file-name)
   (printf "Delete ~s if you'd like to regenerate it.\n" file-name)
   (begin
