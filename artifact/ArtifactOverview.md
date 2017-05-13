@@ -43,9 +43,9 @@ The image is built with minimal installations of nano, vim, and emacs, to allow 
 
 To share a directory, use the `-v HOST-PATH:CONTAINER-PATH` option to map `HOST-PATH` to `CONTAINER-PATH` (note, absolute paths must be used).  If `HOST-PATH` doesn't already exist, it will automatically be created.
 
-For instance, to map the host directory `shared` (relative to the current path) to `/var/shared` on the container, run:
+For instance, to map the host directory `shared` (relative to the current path) to `/artifact/shared` on a throwaway container, run:
 
-`docker run -it --rm -v "$(pwd)"/shared:/var/shared artifact35-auas7pp`
+`docker run -it --rm -v "$(pwd)"/shared:/artifact/shared artifact35-auas7pp`
 
 
 ## Step-by-Step evaluation insructions
