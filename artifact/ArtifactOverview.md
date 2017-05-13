@@ -52,7 +52,9 @@ For instance, to map the host directory `shared` (relative to the current path) 
 
 ### Start the challenge test suite
 
-Once in a container, start the test suite by running: `scheme --script all-challenges.scm`
+Once in a container, start the test suite by running: `scheme --script all-challenges.scm | tee test-output.log`
+
+The log is displayed as the tests run, but it will also be written to the file `test-output.log` in case you'd like to reference it later.
 
 These tests may take some time to complete (currently about 10 minutes).  While the tests are running, make efficient use of your time by starting another container to continue exploring.  Multiple containers for the same image can safely be running at the same time without interfering with each other, as each one maintains its own state, including an independent file system (aside from any explicit sharing you've set up).
 
