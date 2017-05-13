@@ -21,6 +21,6 @@ This creates the `artifact35-auas7pp` image.
 
 ## Save image to archive file (optional)
 
-Once you've built the image, you can save it to an archive file for distribution by running: `docker save -o artifact35-auas7pp.tar`
+Once you've built the image, you can save it to an archive file for distribution by running: `docker save -o artifact35-auas7pp.tar artifact35-auas7pp`
 
 Given an image archive with the same name, you can import it by running: `docker load -i artifact35-auas7pp.tar`
