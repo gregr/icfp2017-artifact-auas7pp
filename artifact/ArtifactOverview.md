@@ -56,9 +56,11 @@ To run with a throwaway container instead, run:
 
 ### Start the challenge test suite
 
-Once in a container, start the test suite by running: `scheme --script all-challenges.scm | tee test-output.log`
+Once in a container, if you've opted to share a directory as suggested, start the test suite by running: `scheme --script all-challenges.scm | tee shared/test-output.log`
 
-The log is displayed as the tests run, but it will also be written to the file `test-output.log` in case you'd like to reference it later.  If you're willing to share a directory with the host, it's a good idea to copy this (and any other generated or edited files) to that directory once the tests finish, for backup.
+Otherwise, start the test suite by running: `scheme --script all-challenges.scm | tee test-output.log`
+
+The log is displayed as the tests run, but it will also be written to the file `test-output.log` in case you'd like to reference it later.  If you're willing to share a directory with the host, it's a good idea to copy this (and any other generated or edited files) to that directory, for backup.
 
 These tests may take some time to complete (currently about 10 minutes).  While the tests are running, make efficient use of your time by starting another container if you'd like to continue with the "Step-by-Step" section.  Multiple containers for the same image can safely be running at the same time without interfering with each other, as each one maintains its own state, including an independent file system (aside from any explicit sharing you've set up).
 
