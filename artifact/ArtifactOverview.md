@@ -71,6 +71,8 @@ Look over the test output log to verify that there are no failures.  Failures ar
 
 If you've made changes, it could affect the order in which correct answers appear.  In fact, completely different, but still correct, answers could show up.  These differences will still be flagged as test failures even if there isn't really a problem.  You'll have to look at the output carefully to determine if this is the case.
 
+Some tests produce timings and resource usage, for measuring performance.  Don't be alarmed by these.
+
 
 ## Step-by-Step evaluation insructions
 
