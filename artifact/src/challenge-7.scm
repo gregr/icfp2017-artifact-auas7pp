@@ -26,6 +26,10 @@
                         [`(,a . ,d)
                           (cons (eval-quasi a eval)
                                 (eval-quasi d eval))]))])
+           ;; We use a nested letrec because our standard version of evalo does
+           ;; not support mutually-recursive definitions, and we'd like to show
+           ;; that it is capable of passing this test.  Our optimized version
+           ;; of evalo supports mutual recursion.
            (letrec ([eval-expr
                       (lambda (expr env)
                         (match expr
