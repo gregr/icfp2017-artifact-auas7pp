@@ -13,10 +13,14 @@ We've tested with "Docker version 17.03.1-ce, build c6d412e" but more recent ver
 
 Once installed, verify that things are working by running: `docker run --rm hello-world`
 
+If it complains about not being able to connect to the Docker daemon, make sure you've started the Docker app itself after installation (this step depends on your OS).
+
 
 ### Load the Docker image
 
-Load the archived image into Docker by running: `docker load -i artifact35-auas7pp.tar`
+If you're in the same directory as the archived image, load it into Docker by running: `docker load -i artifact35-auas7pp.tar`
+
+Otherwise, make sure you specify the full path to the archive file.
 
 
 ### Start a new container
@@ -54,6 +58,18 @@ You will need to know the container's name to manipulate it.  Containers are giv
 To restart and re-enter an exited container, run: `docker start -ia CONTAINER-NAME`
 
 To remove an exited container, run: `docker rm CONTAINER-NAME`
+
+
+### Get familiar with your surroundings
+
+Upon starting the container, you should end up with the prompt: `/artifact #`
+
+This artifact runs on a tiny Linux OS.  If you're new to a Linux system, here are some commands for finding your way around:
+
+- `ls` will list all the file names in your current directory.
+- `less FILENAME` will allow you to read a file without editing it.  You can scroll up and down with the keyboard arrows.
+- `nano FILENAME` will allow you to open a file in a text editor.  All the editing commands will be listed at the bottom of the screen for your convenience.
+- `exit` will allow you to leave the shell, exiting the container.  The prompt should change back to what it was before you started the container.
 
 
 ### Start the challenge test suite
