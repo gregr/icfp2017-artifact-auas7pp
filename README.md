@@ -1,5 +1,7 @@
 # Functional Pearl: A Unified Approach to Solving Seven Programming Problems
 
+http://icfp17.sigplan.org/event/icfp-2017-papers-functional-pearl-a-unified-approach-to-solving-seven-programming-problems
+
 This file explains how to build and optionally archive the Docker image `artifact35-auas7pp` if you don't already have one.  Read `ArtifactOverview.md` to use an existing image.
 
 
