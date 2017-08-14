@@ -532,6 +532,103 @@ Write a query that generates a <code>thrine</code>---that is, three distinct exp
 
 The thrines-generating query may not find a thrine before running out of memory, unless some of the primitives and forms are removed from the <code>evalo</code> relation, which reduces the branching factor of the search.</p>
 
+<h2><a id="lexical-vs-dynamic"></a>Lexical vs. dynamic scope</h2>
+
+<p><div class=challenge>
+<b>Challenge 3.</b>
+Many students struggle with the concept of lexical scope versus dynamic scope.
+
+To help these students out, generate 100 expressions that evaluate to 42 under lexical scope, and 137 under dynamic scope.
+
+To help focus on issues of scope, use a restricted subset of Racket that corresponds to the call-by-value &lambda;-calculus extended with numeric constants.
+</div></p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How would you solve Challenge 3?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>We've seen that we can synthesize programs that evaluate to a particular value&mdash;such as <code>(I love you)</code>&mdash;using a relational interpreter. Our solution to this challenge evaluates an unknown expression simultaneously in <em>two</em> relational interpreters: one implementing lexical scope and one implementing dynamic scope.</p>
+
+<p>We need only a few language forms to reveal distinctions between the two scoping disciplines: lambda, variable reference, function application, and numeric literals for the return values specified in the challenge.
+<!--Figure~\ref{fig:interp} shows the big-step operational semantics for the lexically-scoped version of this minimal language, along with the corresponding relational interpreter in miniKanren.-->
+</p>
+
+<!--In the semantics, $\rho \vdash e \Rightarrow v$ means the expression $e$ evaluates to the value $v$ in the environment $\rho$.
+%
+The metavariable $n$ represents any number, $v$ any value (which includes numbers and closures), $x$ any identifier, $e$ any expression, and $\rho$ any environment (a mapping from identifiers to values).-->
+
+<p>The evaluation judgement is implemented as the miniKanren relation <code>eval-expr-lexo</code>. In our queries we'll use the relation <code>eval-lexo</code> which just calls <code>eval-expr-lexo</code> with the empty environment.
+
+We point out the interesting features of the miniKanren code corresponding to each inference rule:</p>
+
+<ul>
+    <li> <b>const</b> The lazy <code>numbero</code> constraint ensures the clause only applies when <code>expr</code> is a number.</li>
+
+    <li> <b>abs</b> Shadowing is allowed, so the rule only applies when <code>lambda</code> isn't bound in the environment. The recursive <code>not-in-envo</code> relation implements this restriction. Because miniKanren uses first-order unification, we must use data structural representations of expressions, environments, and closures. Expressions are represented as s-expressions, environments as association lists, and closures as lists containing the symbol <code>'closure</code>, the code for the procedure, and the environment where the lambda was evaluated.</li>
+
+    <li> <b>ref</b> The recursive <code>lookupo</code> relation implements variable lookup in the environment (represented as an association list). The lazy <code>symbolo</code> constraint asserts that the expression is a symbol representing a lexical variable.</li>
+
+    <li> <b>app</b> The <code>ext-envo</code> relation extends the environment by unifying <code>new-env</code> with <code>`((,x . ,val) . ,cenv)</code>.</li>
+</ul>
+
+<p><div class="insight">
+<b>Insight:</b>
+    These semantics don't exactly correspond to a subset of Racket. We only care about the behavior of programs that terminate and don't produce errors. As such, we can cheat a little and get away with it! For example, our interpreter won't evaluate the remaining expressions in an application if the first expression, the operator, doesn't evaluate to a closure. In Racket, <code>(5 ((lambda (x) (x x)) (lambda (x) (x x))))</code> loops infinitely, but its evaluation in <code>eval-lexo</code> terminates with failure. Even better, our optimization makes the evaluation of the application <code>(5 e)</code>, where <code>e</code> is an unknown expression, terminate with failure as well. Without this optimization, miniKanren would have to generate, and evaluate, each of the infinitely many possible expressions <code>e</code>.
+
+    Our ``cheat'' to optimize application is valid because our interpreter implements a purely functional language.  Any successful, terminating evaluation must eventually check that the value of the operator expression is a closure. What might happen if we applied this optimization to an interpreter for a language with exceptions? For a language with user-defined exceptions that can be thrown, but not caught, we might treat throwing an exception as failure. Our optimization would remain correct. However, we might instead write an interpreter for a language where exceptions can be caught, or where we want to report details of the exception rather than fail. Then the interpreter must apply the optimization only when it is guaranteed that evaluation will eventually check that the value of the operator expression is a closure. First-class control operators like <code>call/cc</code> present a similar challenge.
+</div></p>
+
+<p>Creating a variant of the interpreter for dynamic scope requires only a tiny change to the application rule: rather than extending <code>cenv, the environment from the closure, we extend <code>env</code>, the environment at the call site. We'll refer to this variant as <code>eval-dyno</code>.</p>
+
+We're ready to solve the challenge! Our query applies each of the two interpreters to the same unknown expression <code>expr</code>, asserting that in each interpreter <code>expr</code> evaluates to the right number.
+
+<div class="live hidden" id="evalo-scoping">
+(load "evalo-scoping.scm")
+</div>
+
+<div class="live" id="run-expr-1" data-lib="evalo-scoping">
+(run 1 (expr)
+  (eval-dyno expr 137)
+  (eval-lexo expr 42))
+</div>
+
+<p>We can easily ask for many more programs; a <code>run 100</code> query finds 100 in 1.7 seconds on an early 2013 MacBook Pro.</p>
+
+<p>Curiously, the query is very slow if the <code>eval-dyno</code> call is reordered after the <code>eval-lexo</code> call.
+
+It turns out that this reordered query spends most of its time evaluating non-terminating programs!
+
+Relatively simple programs in the language of <code>eval-dyno</code> can express non-terminating computations; some of these programs may terminate in <code>eval-lexo</code>. For example, here's a program that evaluates to 42 under lexical scope but does not terminate under dynamic scope:</p>
+<div class="live" id="ex-scoping-1">
+((lambda (x)
+   ((lambda (x) (x 1))
+    (lambda (y) (x 2))))
+ (lambda (z)
+   42))
+</div>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+    Why does the evaluation of this expression never terminate with dynamic scope?
+</div></p>
+
+<p>After the outermost function application, the subexpression</p>
+<div class="live" id="ex-scoping-2">
+((lambda (x) (x 1))
+ (lambda (y) (x 2)))
+</div>
+<p>is evaluated. The parameter of the first <code>lambda</code> expression binds <code>x</code> to the procedure resulting from the second <code>lambda</code> expression. The body of that procedure, <code>(x 2)</code>, is evaluated while the binding is still present in the dynamic environment, making it a recursive call.</p>
+
+<p>Program synthesis tools generally need to take special care to avoid non-terminating programs, and sometimes employ termination checking to rule them out. How is it that our relational interpreters don't get totally stuck when evaluating a non-terminating program?</p>
+
+<p>Instead of exploring the alternative solutions represented by different <code>conde</code> clauses in sequence, the miniKanren search interleaves the work. A non-terminating computation in one clause will consume computational effort but cannot entirely halt work on other solutions. Even with an interleaving search strategy, however, we can still get in trouble. If many non-terminating computations stack up, they can starve work on other candidate solutions for resources. In many circumstances our search is clever enough to avoid that possibility, but here it fails.</p>
+
+<p>In the reordered query with <code>eval-lexo</code> first, the search quickly finds many partial programs that evaluate to 42 in lexical scope. Each of these programs are subsequently evaluated under dynamic scope, and as in the example above, some will never terminate. The implementation of conjunction in miniKanren assigns half of the computational effort to evaluating the first lexical scope solution under dynamic scope, a quarter to the second, an eighth to the third, and so on. That strategy works well when each evaluation quickly succeeds or fails. When those computations fail to terminate, however, later solutions are starved for time.</p>
+
+<p>Why does the query work better with <code>eval-dyno</code> first? Our <code>eval-lexo</code> language doesn't provide a form like <code>letrec</code> for direct recursion, so non-terminating programs require a more complex construction like the Z-combinator (the call-by-value Y-combinator). As a result, the programs that <code>eval-dyno</code> finds before solving our query happen to terminate in <code>eval-lexo</code>.</p>
+
 <h2><a id="proof-checker"></a>A tiny theorem prover</h2>
 
 <p>Here's a tiny proof-checker for propositional logic, written in Racket:</p>
@@ -727,7 +824,7 @@ The outer, relational interpreter handles such an error as failure, so the combi
 
 We use the same technique to fail upon variable lookup in the empty environment, which we represent with the symbol <code>initial-env</code>.</p>
 
-<p>A nested <code>letrec</code> is necessary because our standard version of \scheme{evalo} does not support mutually-recursive definitions, though the optimized \scheme{evalo} used earlier does support mutual recursion.</p>
+<p>A nested <code>letrec</code> is necessary because our standard version of <code>evalo</code> does not support mutually-recursive definitions, though the optimized <code>evalo</code> used earlier does support mutual recursion.</p>
 
 <p><div class="insight">
 <b>Insight:</b>
