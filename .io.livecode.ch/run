@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+cat .io.livecode.ch/header.txt $1 .io.livecode.ch/footer.txt >out.scm
+echo '(load "src/mk/mk.scm")' >load.scm
+if [ -s $2 ]
+then
+    mv $2 extra.scm
+else
+    touch extra.scm
+fi
+cat load.scm extra.scm out.scm >script.scm
+
+scheme src/mk/mk.scm --script script.scm
