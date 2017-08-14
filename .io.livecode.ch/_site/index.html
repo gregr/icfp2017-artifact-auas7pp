@@ -1224,7 +1224,7 @@ The outer, relational interpreter must use a first-order representation of envir
 
 <div class="live norun" id="ss-ex-1">
 ;; pattern used with match
-`(lambda (fake-unquote (? symbol? x)) fake-unquote body)
+`(lambda (,(? symbol? x)) ,body)
 
 ;; solution with conditional expression
 (and (equal? 'lambda (car expr))
