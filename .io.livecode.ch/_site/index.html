@@ -360,6 +360,178 @@ Does it matter what search strategy miniKanren uses?
 
 <p>Both answers include a <code>num</code> side-condition, which we've replaced with the number <code>42</code> so that the expressions will run without error in Racket.</p>
 
+<h2><a id="quines"></a>Quines, twines, and thrines!  Oh my!</h2>
+
+<p>In his classic paper, `A micro-manual for LISP &ndash; Not the whole
+truth,' John McCarthy describes the rules for a LISP
+evaluation function, <code>value</code>, and then offers this challenge [McCarthy 1978]:
+<blockquote>
+Difficult mathematical type exercise: Find a list e such that <code>value e = e</code>.
+</blockquote>
+
+<p><div class=challenge>
+<b>Challenge 1.</b>
+Solve McCarthy's exercise by finding a list <code>e</code> that evaluates to itself in Racket.
+</div></p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How would you solve Challenge 1?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>We could try to construct such a list by hand, either through trial-and-error or through cleverness.
+
+If we were of a more theoretical bent, we could use Kleene's second recursion theorem [Kleene 1952] to construct <code>e</code>.</p>
+
+
+<p>We adopt a different, more direct approach, originally presented by Byrd et al. (2012).
+
+We can once again use <code>evalo</code>, the relational interpreter we describe in section <a href="#a-relational-interpreter">1.2</a>.</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+Write a miniKanren query that uses <code>evalo</code> to find an expression <code>e</code> that evaluates to itself.
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>It's actually very simple to write such a query&mdash;just use the query variable as both the first and second arguments to <code>evalo</code> (representing the ``input'' expression and ``output'' value, respectively):</p>
+
+<div class="live" id="ex-quine-1" data-lib="evalo-standard">
+(run 1 (e) (evalo e e))
+</div>
+
+<p>And, indeed, this query produces an expression that evaluates to itself:</p>
+
+<div class="live norun" id="res-quine-1">
+(_.0 (num _.0))</div>
+
+<p>This answer represents any expression <code>_.0</code> such that <code>_.0</code> is a number (represented by the <code>(num _.0)</code> side-condition).  That is, the answer represents <em>any</em> number.</p>
+
+<p>
+Expressions that evaluate to themselves have been named <em>quines</em> by Hofstadter [1979].
+
+The single answer returned by our query represents <em>infinitely many</em> individual quines, since any numeric literal is trivially a quine in Racket&mdash;for example, the expression <code>42</code> evaluates to the value <code>42</code>.</p>
+
+<div class="live" id="res-num">
+42</div>
+
+<p>We've found a trivial expression that evaluates to itself.
+
+However, the actual challenge is to find a \emph{list} that evaluates to itself.
+
+If we replace the <code>run 1</code> in our query with <code>run 3</code>, we get back two more trivial quines: <code>#t</code> and <code>#f</code>, the self-evaluating Boolean constants in Racket.</p>
+
+
+<p>The fourth answer, produced with <code>run 4</code>, is more interesting:</p>
+
+<div class="live norun" id="res-quine-4">
+(((lambda (_.0) (list _.0 (list 'quote _.0)))
+  '(lambda (_.0) (list _.0 (list 'quote _.0))))
+ (=/= ((_.0 closure)) ((_.0 list)) ((_.0 prim)) ((_.0 quote)))
+ (sym _.0))
+</div>
+
+<p>The first part of this answer is indeed a list that evaluates to itself:</p>
+
+<div class="live" id="ex-quine-4">
+((lambda (_.0) (list _.0 (list 'quote _.0)))
+ '(lambda (_.0) (list _.0 (list 'quote _.0))))
+</div>
+
+<p><div class="aside">
+<b>Fun fact:</b>
+Though McCarthy describes finding quines as a ``difficult mathematical type exercise,'' the quine-generating query is the <em>simplest</em> possible query involving <code>evalo</code>, in that it contains the minimal number of distinct symbols.
+</div></p>
+
+<p>The side-conditions in the second part of the answer tell us that <code>_.0</code> can be any legal Racket identifier, other than <code>closure</code>, <code>list</code>, <code>prim</code>, or <em>quote</em>.
+
+For example, we could replace <code>_.0</code> with the identifier <code>x</code>:</p>
+
+<div class="live" id="ex-quine-4-x">
+((lambda (x) (list x (list 'quote x)))
+ '(lambda (x) (list x (list 'quote x))))
+</div>
+
+<p>However, it would not be legal to replace <code>_.0</code> with the identifier <code>list</code>, since this would shadow the <code>list</code> function used in the body of the <code>lambda</code> expression:</p>
+
+<div class="live" id="ex-quine-4-list">
+((lambda (list) (list list (list 'quote list)))
+ '(lambda (list) (list list (list 'quote list))))
+</div>
+
+<p>Internally <code>evalo</code> uses <code>closure</code> and <code>prim</code> as datatype tags, which is why these names cannot be used in expressions.  This leaky abstraction could be mitigated by generating unique symbols for these tags.  To truly plug up the leak, we would also have to tag all pairs, which would permit the unambiguous use of these tags as values.</p>
+
+<p>We can produce our non-trivial quine using <code>run 1</code> rather than a <code>run 4</code>
+if we unify <code>e</code> with the pair <code>`(,a . ,d)</code>, forcing <code>e</code> to be a list:</p>
+
+<div class="live" id="ex-quine-1-list" data-lib="evalo-standard">
+(run 1 (e)
+  (fresh (a d)
+    (== `(,a . ,d) e))
+  (evalo e e))
+</div>
+
+<p>We can also use <code>evalo</code> to generate <em>twines</em>&mdash;two distinct expressions <code>p</code> and <code>q</code> such that <code>p</code> evaluates to <code>q</code> and <code>q</code> evaluates to <code>p</code>:</p>
+
+<div class="live" id="ex-twines-1" data-lib="evalo-standard">
+(run 1 (p q)
+  (=/= p q)
+  (evalo p q)
+  (evalo q p))
+</div>
+
+<p>Our query uses the <em>disequality constraint</em> operator <code>=/=</code> to assert that <code>p</code> and <code>q</code> must be different.</p>
+
+<p>The result of the query indicates <code>p</code> is the expression</p>
+
+<div class="live" id="res-twines-1-p">
+'((lambda (_.0) (list 'quote (list _.0 (list 'quote _.0))))
+  '(lambda (_.0) (list 'quote (list _.0 (list 'quote _.0)))))
+</div>
+
+<p>and <code>q</code> is the expression</p>
+
+<div class="live" id="res-twines-1-q">
+((lambda (_.0) (list 'quote (list _.0 (list 'quote _.0))))
+ '(lambda (_.0) (list 'quote (list _.0 (list 'quote _.0)))))
+</div>
+
+<p>where, once again, <code>_.0</code> can be any legal Racket identifier, other than <code>closure</code>, <code>list</code>, <code>prim</code>, or <em>quote</em>.  Importantly, <code>_.0</code> must have the same value in both <code>p</code> and <code>q</code>.<p>
+
+<p><div class="aside">
+<b>Insight:</b>
+  ``Lazy constraints''&mdash;such as the disequality constraint <code>=/=</code> and the <code>numbero</code> constraint used to construct the <code>num</code> side-condition&mdash;are an important part of constraint logic programming [Jaffar and Lassez 1987] that we take advantage of here.  These constraints are critical to the performance of <code>evalo</code>.
+
+The abstract representation of a number allowed by the <code>numbero</code> constraint prevents the quine-generating query from enumerating infinitely many trivial quines.
+
+Disequality constraints provide an important form of negation.
+
+Using unification alone, disequality between terms must be expressed by enumerating all possible combinations of values that differ, making twine generation hopelessly inefficient.
+</div></p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+Write a query that generates a <code>thrine</code>---that is, three distinct expressions <code>p</code>, <code>q</code>, and <code>r</code> such that <code>p</code> evaluates to <code>q</code>, <code>q</code> evaluates to <code>r</code>, and <code>r</code> evaluates to <code>p</code>.
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>Here is the thrine-generating query, which requires a disequality constraint for each pairing of <code>p</code>, <code>q</code>, and <code>r</code>:</p>
+
+<div class="live" id="ex-thrines-1" data-lib="evalo-standard">
+(run 1 (p q r)
+  (=/= p q)
+  (=/= p r)
+  (=/= q r)
+  (evalo p q)
+  (evalo q r)
+  (evalo r p))
+</div>
+
+<p>Chaining additional uses of <code>evalo</code>, going from quines to twines to thrines, results in the query taking more time and memory.
+
+The thrines-generating query may not find a thrine before running out of memory, unless some of the primitives and forms are removed from the <code>evalo</code> relation, which reduces the branching factor of the search.</p>
+
 <h2>Acknowledgments</h2>
 
 <p>This material is partially based on research sponsored by
