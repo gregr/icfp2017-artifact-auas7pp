@@ -791,7 +791,7 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
 
 <p>Let's get back to synthesizing <code>append</code>.  We'll start by providing a couple of example calls.</p>
 
-<div class="live" id="syn-app-1" data-lib="evalo-standard">
+<div class="live" id="syn-app-1" data-lib="evalo-optimized">
 (run 1 (defn)
   (fresh (body)
     (== defn `(append (lambda (xs ys) ,body)))
@@ -812,7 +812,7 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
 
 <p>We can use <code>absento</code> to prevent numbers from our examples from appearing in the definition we're synthesizing.  We provide an <code>absento</code> constraint for each number we mention.</p>
 
-<div class="live" id="syn-app-2" data-lib="evalo-standard">
+<div class="live" id="syn-app-2" data-lib="evalo-optimized">
 (run 1 (defn)
   (fresh (body)
     (absento 1 defn) (absento 2 defn)
@@ -834,7 +834,7 @@ How can we synthesize a more general version of <code>append</code>?
 
 <p>Adding a couple more usage examples helps us find a more general definition.</p>
 
-<div class="live" id="syn-app-3" data-lib="evalo-standard">
+<div class="live" id="syn-app-3" data-lib="evalo-optimized">
 (run 1 (defn)
   (fresh (body)
     (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
@@ -856,7 +856,7 @@ Given enough examples, the simplicity of the recursive solution makes it easier 
 
 <p>Though we can synthesize <code>append</code> from scratch, what if a standard library were available?  Would we be able to define <code>append</code> in terms of existing definitions?  Let's try providing <code>fold-right</code>.</p>
 
-<div class="live" id="syn-app-4" data-lib="evalo-standard">
+<div class="live" id="syn-app-4" data-lib="evalo-optimized">
 (run 1 (defn)
   (fresh (body)
     (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
