@@ -532,6 +532,18 @@ Write a query that generates a <code>thrine</code>---that is, three distinct exp
 
 The thrines-generating query may not find a thrine before running out of memory, unless some of the primitives and forms are removed from the <code>evalo</code> relation, which reduces the branching factor of the search.</p>
 
+<h2><a id="conclusion"></a>Conclusion</h2>
+
+<p>While solving these programming challenges we've shown that a relational interpreter can be used to solve myriad problems: example-based synthesis of recursive programs; refutation and bug-finding for incomplete programs; and generating program inputs with desired properties, using both a single interpreter and multiple interpreters with different semantics. Our success in solving the most difficult of these challenges&mdash;such as synthesis of recursive programs&mdash;is due to optimizations that use convenient properties of purely functional programming languages. The freedom to re-order evaluation, thanks to lack of side effects, is particularly important.</p>
+
+<p>We also found that relational interpreters can confer relational capabilities on higher-order functional languages, even through multiple levels of interpretation.
+
+This pearl is a concrete demonstration that a functional program can have more (and surprising!) behaviors than just that for which it was originally written.
+
+In some sense every experienced functional programmer knows this to be true&mdash;for example, we write semantics as relations.
+
+The relational interpreter approach provides a technique for exercising the fully general relational meaning of a functional program.</p>
+
 <h2>Acknowledgments</h2>
 
 <p>This material is partially based on research sponsored by
