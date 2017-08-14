@@ -3,6 +3,378 @@
 {% block title %}A Unified Approach to Solving Seven Programming Problems (Functional Pearl){% endblock %}
 
 {% block content %}
-<h2>A Unified Approach to Solving Seven Programming Problems (Functional Pearl)</h2>
+<p>By William E. Byrd, Michael Ballantyne, Gregory Rosenblatt and Matthew Might.</p>
+<p>To appear in ICFP 2017.</p>
+<p>We present seven programming challenges in Racket, and an elegant, unified approach to solving them using constraint logic programming in miniKanren.</p>
+
+<p>This pearl shows how a single unusual technique can solve a variety of programming problems.  Each problem is presented as a challenge to the reader, and we invite you to develop your own idea of how each problem might be solved before reading ours. If you'd like to consider the challenges with a frame of mind uncolored by our approach, feel free to jump ahead to Section 1. If you'd like a sneak peek, read on.</p>
+
+<p>We solve each challenge by using an interpreter for a subset of Racket, or for a slight variant of Racket.  These interpreters are written as relations in the constraint logic programming language miniKanren. Each interpreter relates two arguments: an expression <code>expr</code> to be evaluated, and the value <code>val</code> to which <code>expr</code> evaluates.
+These arguments may be only partially complete, containing logic variables representing unknown parts. Our miniKanren implementation will use constraint solving and search to fill in the logic variables with expressions and values consistent with the semantics of Racket.
+By placing logic variables representing unknowns in different positions within the <code>expr</code> and <code>val</code> arguments we can express a wide range of interesting queries, which provides the flexibility needed to solve the variety of challenges we pose.</p>
+
+<p>We also show that this technique works especially well for reasoning about programs written in a functional programming language such as Racket.</p>
+
+<h3>A note about the problems.</h3>
+<p>The problem in section <a href="#quines">2</a> is taken directly from Byrd et al. (2012), and the problem from section <a href="#i-love-you">1</a> is a simple variant of an example in that work.
+We include these problems to provide background and understanding for the problems in sections <a href="#lexical-vs-dynamic">3</a> through <a href="#scheme-in-scheme">7</a>, which are all novel.<p>
+
+<h2><a id="i-love-you"></a>99,000 ways to say (I love you) in Racket</h2>
+
+<p>In his Valentine's Day blog post, "99 ways to say <code>'(I love you)</code> in Racket," one of the authors [<a href="http://matt.might.net/articles/i-love-you-in-racket/">Might 2013</a>] writes:
+
+<blockquote>
+In spite of their simplicity, lists often confound new Racket programmers.
+
+After lists, the many forms for expressing a computation in Racket take time to discover and then master.
+
+To address both of these points, I've created 99 roughly tweet-sized expressions in Racket that all evaluate to the list <code>'(I love you)</code>.
+</blockquote>
+
+<p>Racket prints the list value <code>(I love you)</code> as the quotation expression <code>'(I love you)</code>, and Might follows this convention. In this paper we show just the value. To replicate our results in Racket, evaluate <code>(print-as-expression #f)</code> before the examples.</p>
+
+<p>These examples, such as the three below, introduce students to an assortment of Racket's features.</p>
+
+<div class="live" id="ex1">
+(cdr '(Hark! I love you))</div>
+<div class="live" id="ex2">
+((lambda (a c b) (list a b c)) 'I 'you 'love)</div>
+<div class="live norun" id="ex3">
+(match #t
+  [#f '(Not me)]
+  [#t '(I love you)])</div>
+
+<p>Inspired by a love of Racket, and a love of the list <code>(I love you)</code>, we want to go even further.</p>
+
+<p><div class=challenge>
+<b>Challenge 1.</b>
+Come up with 99,000 Racket expressions that evaluate to the list <code>(I love you)</code>, demonstrating a variety of expression types in the spirit of the blog post.
+</div></p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How would you solve Challenge 1?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>We could follow Might's approach, and write the 99,000 Racket expressions by hand.
+
+However, even we don't love the list <code>(I love you)</code> <em>that</em> much.
+
+There must be a better way...<p>
+
+<p>The semantics of a programming language can be defined by an evaluation relation, which relates programs to their behaviors.
+
+For example, an evaluation relation for Racket relates the expression <code>(let ((x 5)) (+ x x))</code> with the value <code>10</code>.
+
+An interpreter for Racket expressions is an implementation of the evaluation relation for a special case: the expression to be evaluated is known, and the value is to be derived.
+
+What if instead of writing a normal interpreter, we implemented the evaluation relation in a constraint logic programming language, designed to query relations with any arguments unknown? We could solve our problem by simply leaving the expression argument as an unknown and specifying the value argument to be the list <code>(I love you)</code>.
+
+To understand this approach we must first learn a little about how to write relations in <em>miniKanren</em>,
+an embedded domain specific language for constraint logic programming [Byrd and Friedman 2006; Friedman et al. 2005].</p>
+
+<h3><a id="relational-programming-in-minikanren"></a>Relational Programming in miniKanren</h3>
+
+<p>Let's take list concatenation as our example. Here's how we might define <code>append</code> in Racket:</p>
+
+<div class="live norun" id="append-1">
+(define append
+  (lambda (l s)
+    (cond
+      [(null? l) s]
+      [else (cons (car l) (append (cdr l) s))])))
+</div>
+
+<p>We name results of intermediate expressions, in order to make our next transformation more clear.</p>
+
+<div class="live norun" id="append-2">
+(define append
+  (lambda (l s)
+    (cond
+      [(null? l) s]
+      [else
+       (let* ((a (car l))
+              (d (cdr l))
+              (res (append d s)))
+         (cons a res))])))
+</div>
+
+<p>This two-argument <code>append</code> function can now be translated into the three-argument \scheme{appendo} relation in miniKanren:</p>
+
+<div class="live norun" id="appendo">
+(define appendo
+  (lambda (l s ls)
+    (conde
+      [(== '() l) (== s ls)]
+      [(fresh (a d res)
+         (== `(,a . ,d) l)
+         (== `(,a . ,res) ls)
+         (appendo d s res))])))
+</div>
+
+<p>We'll explain the miniKanren language forms used in this definition, but first let's take a look at what <code>appendo</code> can do.
+
+The original <code>append</code> function can be used to concatenate two lists:
+
+<div class="live" id="ex-append-1">
+(append '(a b c) '(d e))
+</div>
+
+<p>The <code>appendo</code> relation can also be used the same way. In order to use the relation, we construct a <em>query</em> using the <code>run*</code> form. A query consists of <em>query variables</em> and calls to relations that will constrain those variables. Using search and constraint solving, miniKanren attempts to find values for the query variables that satisfy the constraints imposed by the relations. We emulate the behavior of <code>append</code> by calling <code>appendo</code> with concrete lists for the first two arguments, and the query variable <code>q</code> representing an unknown third argument:</p>
+
+<div class="live" id="ex-appendo-1" data-lib="appendo">
+(run* (q) (appendo '(a b c) '(d e) q))
+</div>
+
+<p>More excitingly, we can use <code>appendo</code> to <em>infer</em> the list <code>q</code> that, when prepended to the list <code>(d e)</code>, produces <code>(a b c d e)</code>:</p>
+
+<div class="live" id="ex-appendo-2" data-lib="appendo">
+(run* (q) (appendo q '(d e) '(a b c d e)))
+</div>
+
+<p>These examples treating list concatenation as a relation will be familiar to any Prolog programmer.</p>
+
+<p>A query needn't produce only a single answer. We can also infer all pairs of lists <code>x</code> and <code>y</code> that when appended together produce <code>(a b c d e)</code></p>
+
+<div class="live" id="ex-appendo-3" data-lib="appendo">
+(run* (x y) (appendo x y '(a b c d e)))
+</div>
+
+<p>Now that we've seen the added expressivity we get from writing <code>appendo</code> as a relation, let's consider its implementation. The definition of <code>appendo</code> uses the three core logical operators from miniKanren: <code>==</code>, <code>fresh</code>, and <code>conde</code>.  These operators construct goals representing logical assertions, which may succeed or fail.</p>
+
+<p><code>(== t1 t2)</code> is a goal which asserts that <code>t1</code> and <code>t2</code> have the same value.
+
+For example, <code>(== 5 5)</code> <em>succeeds</em>, while <code>(== 5 6)</code> <em>fails</em>.
+
+<code>==</code> is implemented using <em>first-order unification</em>, essentially a bidirectional form of pattern matching.
+
+Unification operates on <em>terms</em>.<a id="term-definition-paragraph"></a>
+
+A  miniKanren term is either the empty list, a Boolean constant, a number, a symbol, a <em>logic variable</em>, or a pair of terms.
+
+Logic variables start out <em>fresh</em>&mdash;that is, they initially have no value&mdash;and may later obtain a value through calls to <code>==</code>.
+
+For example, assuming <code>x</code> is a fresh logic variable, <code>(== 5 x)</code> succeeds, and associates <code>x</code> with the value 5.
+
+A subsequent call <code>(== 6 x)</code> would fail, since <code>x</code> would already be associated with 5.</p>
+
+<p>As mentioned, we can apply <code>==</code> to terms that are pairs&mdash;for example, if <code>x</code> and <code>y</code> are fresh variables, the goal
+<code>(== (cons 3 4) (cons x y))</code> would succeed, and associate <code>x</code> with <code>3</code> and <code>y</code> with <code>4</code>.
+
+For succinctness we often write pairs and lists using Racket's <code>quasiquote</code> and <code>unquote</code> syntax.
+
+The single characters <code>`</code> and <code>,</code> are shorthand for these forms, respectively.
+
+All of these expressions are equivalent:</p>
+
+<div class="live hidden" id="def-x">
+(define x 5)
+</div>
+
+<div class="live" id="ex-cons-1" data-lib="def-x">
+(cons 3 (cons (cons x (quote y)) (cons 4 (quote ()))))</div>
+<div class="live" id="ex-cons-2" data-lib="def-x">
+(list 3 (cons x (quote y)) 4)</div>
+<div class="live" id="ex-cons-3" data-lib="def-x">
+(list 3 (cons x 'y) 4)</div>
+<div class="live" id="ex-cons-4" data-lib="def-x">
+(quasiquote (3 ((unquote x) . y) 4))</div>
+<div class="live" id="ex-cons-5" data-lib="def-x">
+`(3 (,x . y) 4)</div>
+
+<p>If the variable <code>x</code> were bound to <code>5</code>, each expression above would evaluate to <code>(3 (5 . y) 4)</code>.</p>
+
+<p><code>(fresh (x* ...) g g* ...)</code> introduces lexically scoped, fresh logic variables <code>x* ...</code>; <code>fresh</code> also performs logical conjunction (`and') over the goals in its body, <code>g g* ...</code>, forming a new goal asserting that conjunction.
+
+The <code>fresh</code> expression
+
+<code>(fresh (y z) (== 5 y) (== 6 z) (== y z))</code>
+
+first introduces logic variables <code>y</code> and <code>z</code>, then performs a conjunction of the three calls to <code>==</code>; <code>(== 5 y)</code> and <code>(== 6 z)</code> succeed, but <code>(== y z)</code> fails (since <code>y</code> and <code>z</code> are associated with <code>5</code> and <code>6</code>, which differ), causing the entire <code>fresh</code> expression to fail.</p>
+
+<p><code>(conde (g0 g0* ...) (g1 g1* ...) ...)</code> constructs a goal that performs logical disjunction (`or') over its clauses.
+
+Each clause acts as a conjunction over the goals it contains.
+
+A simple <code>conde</code> expression is
+
+<code>(conde ((== 3 x) (== 4 y)) ((== 5 x)))</code>
+
+with the two clauses <code>((== 3 x) (== 4 y))</code> and <code>((== 5 x))</code>.
+
+The first clause is a conjunction of \mbox{<code>(== 3 x)</code>} and \mbox{<code>(== 4 y)</code>}.
+
+In this case both clauses succeed: the first clause associates <code>x</code> with <code>3</code> and <code>y</code> with <code>4</code>; the second clause produces a distinct answer that associates <code>x</code> with <code>5</code> but doesn't constrain <code>y</code>.
+
+Since both clauses succeed, the entire <code>conde</code> expression succeeds twice, and can produce two answers.</p>
+
+<p>Looking at the definition of <code>appendo</code>, we see its body is a <code>conde</code> expression with two clauses.  The first clause represents the base case, corresponding to the first clause of the <code>append</code> function's <code>cond</code> expression.  The goal <code>(== '() l)</code> corresponds to the <code>null?</code> check, while <code>(== s ls)</code> corresponds to returning the value of <code>s</code>, with <code>ls</code> representing the appended result of <code>l</code> and <code>s</code>.  The second clause corresponds to the second clause of the <code>append</code> function's <code>cond</code>.  Having named the intermediate results in <code>append</code>, we can see how the unifications in this clause correspond to taking the pair <code>l</code> apart, and constructing a return value using the result of a recursive invocation of <code>appendo</code>.  Because logical assertions can be made in any order, we are able to place the recursive invocation last in this clause.  This ordering is preferable, since encountering a failing unification early can make it unnecessary to perform the recursion.</p>
+
+<p>Let's also revisit our query:</p>
+
+<div class="live" id="ex-appendo-4" data-lib="appendo">
+(run* (q) (appendo '(a b c) '(d e) q))
+</div>
+
+<p>Here <code>run*</code> introduces the query variable <code>q</code>, then evaluates its body as a conjunction of goals, returning a list of all the answers it produces.  Under the hood, miniKanren uses a search that traverses the tree of conjunctions and disjunctions constructed by <code>fresh</code> and <code>conde</code>.
+
+Each answer consists of a list of values unified with query variables, followed by any additional side conditions introduced by lazy constraints.  In this case, there is only a single answer unifying a single query variable to a value that happens to be a list, resulting in a triply-nested list.  Here the single answer found unifies <code>q</code> with <code>(a b c d e)</code>. If we wanted miniKanren to stop searching after producing the first answer rather than continuing until it can prove there are no more, we could use \mbox{<code>run 1</code>} rather than <code>run*</code>.</p>
+
+<h3><a id="a-relational-interpreter"></a>Loving Lists via a Relational Interpreter</h3>
+
+<p>As we just saw, by treating list concatenation as a relation instead of a function we get additional, useful behavior.
+
+This is also true of more complicated programs, such as interpreters.</p>
+
+<p>Imagine an interpreter for a subset of Racket, written as a miniKanren relation.
+
+This interpreter&mdash;which we might call <code>evalo</code>&mdash;would take two arguments: an expression <code>e</code> to be evaluated, and the value <code>v</code> of that expression.
+
+For example,</p>
+
+<div class="live hidden" id="evalo-standard">
+(load "evalo-standard.scm")
+</div>
+
+<div class="live" id="ex-evalo-1" data-lib="evalo-standard">
+(run 1 (q) (evalo '((lambda (x) x) 5) q))
+</div>
+
+<p>would return <code>((5))</code>, indicating the Racket expression
+<code>((lambda (x) x) 5)</code> evaluates to the value <code>5</code>.</p>
+
+
+<p>The good news is that <code>evalo</code> actually exists!  We've written an interpreter for a small&mdash;but interesting and Turing-complete&mdash;subset of Racket, including first-class multi-argument and variadic functions, <code>letrec</code> for defining recursive definitions, and a simple pattern matcher.</p>
+
+<p>Other than the pattern matcher, the language supported by <code>evalo</code> is also a subset of Scheme.</p>
+
+<p>
+Our <code>evalo</code> is inspired by, but significantly extends, the relational interpreter given in Byrd et al. (2012).
+
+The even better news is that we can use <code>evalo</code> to generate expressions that evaluate to <code>(I love you)</code>!</p>
+
+
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+Construct a miniKanren query that uses <code>evalo</code> to solve Challenge 1.
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+
+<p>Let's start off small, by generating just a single expression that evaluates to <code>(I love you)</code>:</p>
+
+<div class="live" id="ex-i-love-you-1" data-lib="evalo-standard">
+(run 1 (q) (evalo q '(I love you)))
+</div>
+
+<p>Success!  The expression <code>'(I love you)</code> evaluates to the list <code>(I love you)</code>.  This expression isn't very exciting, though.  Let's try to find more interesting answers...
+
+Emulating the blog post, we can replace <code>run 1</code> with <code>run 99</code>.</p>
+
+<div class="live" id="ex-i-love-you-99" data-lib="evalo-standard">
+(run 99 (q) (evalo q '(I love you))
+</div>
+
+Here are a few of the 99 expressions generated, all of which evaluate to <code>(I love you)</code>:
+
+<div class="live" id="res-i-love-you-1">
+(list 'I 'love 'you)</div>
+<div class="live" id="res-i-love-you-2">
+((lambda () '(I love you)))</div>
+<div class="live" id="res-i-love-you-3">
+(cons 'I '(love you))</div>
+<div class="live" id="res-i-love-you-4">
+(and '(I love you))</div>
+<div class="live" id="res-i-love-you-5">
+(car (list '(I love you)))</div>
+
+<p>Here is a slightly more complex answer:</p>
+
+<div class="live norun" id="res-i-love-you-6">
+(((lambda _.0 _.0) 'I 'love 'you)
+ (sym _.0))
+</div>
+
+<p>The <code>sym</code> side-condition tells us that <code>_.0</code> in the expression <code>((lambda _.0 _.0) 'I 'love 'you)</code> can be replaced by any legal Racket identifier (represented in our interpreter as a Racket symbol).
+
+For example,</p>
+
+<div class="live" id="res-i-love-you-7">
+((lambda x x) 'I 'love 'you)</div>
+
+<p>However, it's not actually necessary to replace <code>_.0</code> with another identifier, since <code>_.0</code> is itself a valid identifier in Racket:</p>
+
+<div class="live" id="res-i-love-you-8">
+((lambda _.0 _.0) 'I 'love 'you)</div>
+
+<p>This answer is especially interesting because <code>(lambda x x)</code> is a <em>variadic</em> function&mdash;that is, a function that takes any number of arguments&mdash;which returns the arguments passed to it as a list.
+
+The application <code>((lambda x x) 'I 'love 'you)</code> is equivalent to the expression <code>(list 'I 'love 'you)</code>.
+
+Here is one more interesting answer:</p>
+
+<div class="live norun" id="res-i-love-you-9">
+((if _.0 '(I love you) _.1)
+ (num _.0))
+</div>
+
+<p>The side condition <code>(num _.0)</code> indicates that <code>_.0</code> in the expression
+<code>(if _.0 '(I love you) _.1)</code> represents an arbitrary numeric constant.
+
+Replacing <code>_.0</code> with a specific number, such as <code>42</code>, yields the expression
+<code>(if 42 '(I love you) _.1)</code>.
+
+Since <code>42</code> is considered a true value in Racket, the `else' arm of the <code>if</code> expression is never evaluated.
+
+Therefore <code>_.1</code> may be replaced by <em>any</em> legal Racket expression, and the overall expression will still evaluate to <code>(I love you)</code>.</p>
+
+<p>There's something important happening in miniKanren's implementation to make these queries work. We can think of all the ways of constructing an expression as forming an infinite tree, branching at every point where a different kind of subexpression could be selected. The execution of the <code>evalo</code> relational interpreter searches through this tree for expressions that evaluate to <code>(I love you)</code>.</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+Does it matter what search strategy miniKanren uses?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>In fact, the search strategy matters a great deal.<a id="search-bias-paragraph"></a> Searching an infinite tree requires care: for example, depth-first search could get stuck considering an infinite subtree that doesn't contain answers to our query. Even when depth-first search does find answers in an infinite tree, it might find only one kind of answer rather than the variety of answers we're looking for. Our example programs might then only use <code>list</code> and <code>car</code>, but never <code>lambda</code>. Thus it is important that miniKanren uses a complete search, which interleaves the processes of searching different parts of the tree [Kiselyov et al. 2005]. Our interleaving search also biases towards branches which have shown progress in the form of intermediate results, rewarding them with an increased share of the search effort. This bias allows miniKanren's search to investigate promising branches much more deeply than would unbiased complete searches like breadth-first and iterative deepening depth-first search.</p>
+
+<p>Now it's time to shift our query into overdrive:</p>
+
+<div class="live" id="ex-i-love-you-99000" data-lib="evalo-standard">
+(run 99000 (q) (evalo q '(I love you)))
+</div>
+
+<p>Here are two artisanal, free-range <code>(I love you)</code> expressions, hand-curated from the 99,000 answers:
+
+<div class="live" id="res-i-love-you-10">
+((lambda ()
+   (((lambda () cons)) 'I
+    ((lambda _.0 '(love you)) list 42))))
+</div>
+
+<div class="live" id="res-i-love-you-11">
+(car ((lambda (_.0) (_.0 '(I love you) 42 list)) list))
+</div>
+
+<p>Both answers include a <code>num</code> side-condition, which we've replaced with the number <code>42</code> so that the expressions will run without error in Racket.</p>
+
+<h2>Acknowledgments</h2>
+
+<p>This material is partially based on research sponsored by
+<a href="https://dx.doi.org/10.13039/100000185">DARPA</a> under agreement number AFRL FA8750-15-2-0092
+and by <a href="https://dx.doi.org/10.13039/100000001">NSF</a> under CAREER grant 1350344. The views
+expressed are those of the authors and do not reflect the
+official policy or position of the Department of Defense or
+the U.S. Government. The U.S. Government is authorized to
+reproduce and distribute reprints for Governmental purposes
+notwithstanding any copyright notation thereon.</p>
+
+<p>Stuart Halloway pointed out that the relational interpreter should be able to generate quines; thank you, Stuart!
+We thank Larry Moss and the members of the Indiana University logic seminar for their encouragement, and for challenging us to generate twines and thrines.
+Eric Holk and Dan Friedman worked with co-author Byrd on quine generation in miniKanren, which led to a paper (<a href="http://webyrd.net/quines/quines.pdf">PDF</a>) from which Challenge 2 was taken.</p>
+
+<p>We thank Dan Friedman, Nada Amin, Jason Hemann, Rob Zinkov, Tom Gilray, Lisa Zhang, Jon Smock, Dann Toliver, Annie Cherkaev, Guannan Wei, Dmitri Boulytchev, Evan Donahue, Steve Gilardi, and the anonymous reviewers for their many helpful comments.</p>
 
 {% endblock %}
