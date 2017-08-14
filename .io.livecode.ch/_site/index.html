@@ -499,7 +499,7 @@ if we unify <code>e</code> with the pair <code>`(,a . ,d)</code>, forcing <code>
 
 <p>where, once again, <code>_.0</code> can be any legal Racket identifier, other than <code>closure</code>, <code>list</code>, <code>prim</code>, or <em>quote</em>.  Importantly, <code>_.0</code> must have the same value in both <code>p</code> and <code>q</code>.<p>
 
-<p><div class="aside">
+<p><div class="insight">
 <b>Insight:</b>
   ``Lazy constraints''&mdash;such as the disequality constraint <code>=/=</code> and the <code>numbero</code> constraint used to construct the <code>num</code> side-condition&mdash;are an important part of constraint logic programming [Jaffar and Lassez 1987] that we take advantage of here.  These constraints are critical to the performance of <code>evalo</code>.
 
@@ -531,6 +531,109 @@ Write a query that generates a <code>thrine</code>---that is, three distinct exp
 <p>Chaining additional uses of <code>evalo</code>, going from quines to twines to thrines, results in the query taking more time and memory.
 
 The thrines-generating query may not find a thrine before running out of memory, unless some of the primitives and forms are removed from the <code>evalo</code> relation, which reduces the branching factor of the search.</p>
+
+<h2><a id="scheme-in-scheme"></a>Quines, revisited</h2>
+
+<p><div class=challenge>
+<b>Challenge 7.</b>
+Generate a quine that uses <code>quasiquote</code> instead of <code>list</code> or <code>cons</code>.
+</div></p>
+
+
+<p>The quines using <code>list</code> and <code>cons</code> generated in section <a href="#quines">2</a> are a little verbose.
+
+Surely a quine can be more concise! Perhaps a quine could use <code>quasiquote</code> to construct the expression.
+
+Sadly, our <code>evalo</code> relational interpreter doesn't include the <code>quasiquote</code> form.
+
+We could extend the interpreter to add it, but is there another way?</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How would you solve Challenge 7 without modifying the relational interpreter?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>Unlike <code>append</code>, <code>quasiquote</code> can't be implemented as a function, since it does not directly evaluate its argument, but rather interprets its argument to find <code>unquote</code> forms. Thus we can't simply define <code>quasiquote</code> in the interpreter with <code>letrec</code>.
+
+We need to go more meta!  We'll use a meta-circular evaluator running <em>inside</em> the relational interpreter.</p>
+
+<p>Let's write an interpreter for a small subset of Racket that includes <code>quasiquote</code>, in the subset of Racket supported by the relational interpreter. Our query asserts that applying the nested interpreter to the quoted s-expression of the quine should return that same s-expression.</p>
+
+<p class="footnote">The unfortunate representation of the pattern for matching unquote expressions results from an oddity of Racket's quasiquotation support. In other Scheme implementations that line can be written [`(,`unquote ,exp) (eval exp)].</p>
+
+<div class="live" id="ss-evalo-1" data-lib="evalo-standard">
+(run 1 (q)
+  (evalo
+    `(letrec ([eval-quasi (lambda (q eval)
+                            (match q
+                              [(? symbol? x) x]
+                              [`() '()]
+                              [`(,,'`unquote fake-unquote exp) (eval exp)]
+                              [`(quasiquote fake-unquote datum) ('error)]
+                              [`(fake-unquote a . fake-unquote d) (cons (eval-quasi a eval) (eval-quasi d eval))]))])
+       (letrec ([eval-expr (lambda (expr env)
+                             (match expr
+                               [`(quote fake-unquote datum) datum]
+                               [`(lambda (fake-unquote (? symbol? x)) fake-unquote body)
+                                (lambda (a)
+                                  (eval-expr body (lambda (y)
+                                                    (if (equal? x y)
+                                                        a
+                                                        (env y)))))]
+                               [(? symbol? x) (env x)]
+                               [`(quasiquote fake-unquote datum)
+                                (eval-quasi
+                                  datum
+                                  (lambda (exp) (eval-expr exp env)))]
+                               [`(fake-unquote rator fake-unquote rand)
+                                ((eval-expr rator env) (eval-expr rand env))]))])
+         (eval-expr ',q 'initial-env)))
+    q))
+</div>
+
+<p>To keep the meta-circular evaluator concise, we don't implement nested quasiquotation.
+
+Instead, whenever the meta-circular evaluator encounters a nested <code>quasiquote</code> it produces an error by illegally attempting to call a symbol.
+
+The outer, relational interpreter handles such an error as failure, so the combination of interpreters won't generate programs using nested quasiquotation.
+
+We use the same technique to fail upon variable lookup in the empty environment, which we represent with the symbol <code>initial-env</code>.</p>
+
+<p>A nested <code>letrec</code> is necessary because our standard version of \scheme{evalo} does not support mutually-recursive definitions, though the optimized \scheme{evalo} used earlier does support mutual recursion.</p>
+
+<p><div class="insight">
+<b>Insight:</b>
+The outer, relational interpreter must use a first-order representation of environments and closures, as miniKanren only supports first-order terms. However, our Racket-in-Racket can use higher order representations thanks to its meta-circular use of that outer implementation. Environments are represented as functions that accept a symbol and return the value to which it is bound.  When extending an environment, we wrap it in a new function that first checks a variable against the new binding.  If the variable doesn't match, the new function delegates to the original environment by calling the function representing it.
+</div></p>
+
+<p>The meta-circular evaluator uses pattern matching to recognize each form of expression. In the relational setting it's even more important than usual to specify programs unambiguously.  Consider what might happen if rather than using <code>match</code>, we were to use this conditional expression to recognize the syntax for a <code>lambda</code> expression:</p>
+
+<div class="live norun" id="ss-ex-1">
+;; pattern used with match
+`(lambda (fake-unquote (? symbol? x)) fake-unquote body)
+
+;; solution with conditional expression
+(and (equal? 'lambda (car expr))
+     (pair? (cadr expr))
+     (symbol? (caadr expr))
+     (pair? (cddr expr)))
+</div>
+
+<p>When evaluating an instantiated expression with well-formed syntax, this condition should work. But when generating expressions, miniKanren can invent any expression that satisfies the condition. It might generate the identity function like this:</p>
+<div class="live norun" id="ss-res-1">
+(lambda (x . _.0) x . _.1)</div>
+<p>where <code>_.0</code> and <code>_.1</code> indicate that any term whatsoever may appear in those positions.  Although the values in those positions don't affect the behavior of the expression in this evaluator, they both have to be the empty list in order for this function to behave the way we expect in Racket.</p>
+
+<p>To ensure the expression assumes the desired syntax, the condition would need two more checks to fully specify the form: <code>(null? (cdadr expr))</code> and <code>(null? (cdddr expr))</code>. In contrast, the natural way of writing the evaluator with <code>match</code> fully specifies the format.</p>
+
+<p>Our <code>quasiquote</code> quine-generating query returns the answer:</p>
+<div class="live norun" id="ss-res-quine-1">
+((((lambda (_.0) `(,_.0 ',_.0))
+   '(lambda (_.0) `(,_.0 ',_.0)))
+  (=/= ((_.0 closure)) ((_.0 prim))) (sym _.0)))
+</div>
+<p>Finding quines through the meta-circular evaluator is much slower than the approach we used in section <a href="#quines">2</a>&mdash;this query takes 5 minutes with our current hardware&mdash;but it allows us to generate programs using a new language form without modifying our relational interpreter.</p>
 
 <h2><a id="conclusion"></a>Conclusion</h2>
 
