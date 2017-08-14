@@ -532,6 +532,127 @@ Write a query that generates a <code>thrine</code>---that is, three distinct exp
 
 The thrines-generating query may not find a thrine before running out of memory, unless some of the primitives and forms are removed from the <code>evalo</code> relation, which reduces the branching factor of the search.</p>
 
+<h2><a id="proof-checker"></a>A tiny theorem prover</h2>
+
+<p>Here's a tiny proof-checker for propositional logic, written in Racket:</p>
+
+<div class="live norun" id="proof-1">
+(define proof?
+  (lambda (proof)
+    (match proof
+      [`(,A ,assms assumption ())
+       (member? A assms)]
+      [`(,B ,assms modus-ponens (((,A => ,B) ,assms ,r1 ,ants1)
+                                 (,A ,assms ,r2 ,ants2)))
+       (and (proof? `((,A => ,B) ,assms ,r1 ,ants1))
+            (proof? `(,A ,assms ,r2 ,ants2)))]
+      [`((,A => ,B) ,assms conditional ((,B (,A . ,assms) ,rule ,ants)))
+       (proof? `(,B (,A . ,assms) ,rule ,ants))])))
+</div>
+
+<p>A proof is represented as a list <code>(conclusion assumptions rule-name sub-proofs)</code> where:</p>
+<ul>
+ <li> <code>conclusion</code> is a miniKanren term;</li>
+ <li> <code>assumptions</code> is a list of terms;</li>
+ <li> <code>rule-name</code> is a symbol;</li>
+ <li> <code>sub-proofs</code> is a list of zero or more proofs.</li>
+</ul>
+
+<p>This proof-checker has only three rules: assumptions, such as the proposition <code>A</code> or the implication <code>A => B</code>;
+<em>modus ponens</em>, which derives <code>B</code> from <code>A</code> and <code>A => B</code>; and conditional proof, which derives <code>A => B</code> if we can derive <code>B</code> after assuming <code>A</code>.
+
+For example, we can check this proof that <code>C</code> holds, assuming <code>A</code>, <code>A => B</code>, and <code>B => C</code>:</p>
+
+<div class="live norun" id="ex-proof-1" data-lib="proof-1">
+(proof? '(C (A (A => B) (B => C)) modus-ponens
+            (((B => C) (A (A => B) (B => C)) assumption ())
+             (B (A (A => B) (B => C)) modus-ponens
+                (((A => B) (A (A => B) (B => C)) assumption ())
+                 (A (A (A => B) (B => C)) assumption ()))))))
+</div>
+
+<p><div class=challenge>
+<b>Challenge 6.</b>
+Write a tiny theorem prover for the logic of the proof checker, <code>proof?</code>.
+</div></p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How would you solve Challenge 6?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>How might we write our tiny prover? A simple (though inefficient) algorithm might use a goal-directed, breadth-first search, which is complete over infinite trees. But miniKanren \emph{already} implements a complete, goal directed search! What happens if we just run the proof checker in the relational interpreter we've used for the previous challenges?</p>
+
+<p>Just as we treated the function <code>append</code> as a relation by running it inside the relational interpreter, we can treat the <code>proof?</code> function as a relation that connects assumptions, proofs, and conclusions. Here we query the <code>proof?</code> function to generate proofs of a theorem, given a set of assumptions:</p>
+
+<div class="live hidden" id="evalo-optimized">
+(load "evalo-optimized.scm")
+(set! allow-incomplete-search? #t)
+</div>
+
+<div class="live" id="run-prf-1" data-lib="evalo-optimized">
+(run 1 (prf)
+  (fresh (body)
+    ;; prove C holds, given A, A => B, B => C
+    (== prf `(C (A (A => B) (B => C)) . ,body))
+    (evalo
+      `(letrec ([member?
+                 (lambda (x ls)
+                   (cond
+                     ((null? ls) #f)
+                     ((equal? (car ls) x) #t)
+                     (else (member? x (cdr ls)))))]
+                [proof?
+                 (lambda (proof)
+                   (match proof
+                     [`(,A ,assms assumption ()) (member? A assms)]
+                     [`(,B ,assms modus-ponens
+                           (((,A => ,B) ,assms ,r1 ,ants1)
+                            (,A ,assms ,r2 ,ants2)))
+                      (and (proof? `((,A => ,B) ,assms ,r1 ,ants1))
+                           (proof? `(,A ,assms ,r2 ,ants2)))]
+                     [`((,A => ,B) ,assms conditional
+                        ((,B (,A . ,assms) ,rule ,ants)))
+                      (proof? `(,B (,A . ,assms) ,rule ,ants))]))])
+         (proof? ',prf))
+      #t)))
+</div>
+
+<p>Sure enough, miniKanren finds the proof we checked previously.</p>
+
+<p>By instantiating different parts of the query, we can use <code>proof?</code> in different ways. We can partially instantiate the proof and ask the query to fill in the missing parts, or provide assumptions and ask the query to search for all valid conclusions with corresponding proofs.  This method is powerful enough to prove interesting theorems, such as transitivity of implication:</p>
+
+<div class="live" id="run-prf-2" data-lib="evalo-optimized">
+(run 1 (prf)
+  (fresh (body)
+    ;; prove (A => B) => (B => C) => (A => C) holds absolutely
+    (== prf `(((A => B) => ((B => C) => (A => C))) () . ,body))
+    (evalo
+      `(letrec ([member?
+                 (lambda (x ls)
+                   (cond
+                     ((null? ls) #f)
+                     ((equal? (car ls) x) #t)
+                     (else (member? x (cdr ls)))))]
+                [proof?
+                 (lambda (proof)
+                   (match proof
+                     [`(,A ,assms assumption ()) (member? A assms)]
+                     [`(,B ,assms modus-ponens
+                           (((,A => ,B) ,assms ,r1 ,ants1)
+                            (,A ,assms ,r2 ,ants2)))
+                      (and (proof? `((,A => ,B) ,assms ,r1 ,ants1))
+                           (proof? `(,A ,assms ,r2 ,ants2)))]
+                     [`((,A => ,B) ,assms conditional
+                        ((,B (,A . ,assms) ,rule ,ants)))
+                      (proof? `(,B (,A . ,assms) ,rule ,ants))]))])
+         (proof? ',prf))
+      #t)))
+</div>
+
+<p>We can also prove commutativity of conjunction where conjunction is encoded with implication.</p>
+
 <h2><a id="scheme-in-scheme"></a>Quines, revisited</h2>
 
 <p><div class=challenge>
@@ -565,30 +686,36 @@ We need to go more meta!  We'll use a meta-circular evaluator running <em>inside
 <div class="live" id="ss-evalo-1" data-lib="evalo-standard">
 (run 1 (q)
   (evalo
-    `(letrec ([eval-quasi (lambda (q eval)
-                            (match q
-                              [(? symbol? x) x]
-                              [`() '()]
-                              [`(,,'`unquote fake-unquote exp) (eval exp)]
-                              [`(quasiquote fake-unquote datum) ('error)]
-                              [`(fake-unquote a . fake-unquote d) (cons (eval-quasi a eval) (eval-quasi d eval))]))])
-       (letrec ([eval-expr (lambda (expr env)
-                             (match expr
-                               [`(quote fake-unquote datum) datum]
-                               [`(lambda (fake-unquote (? symbol? x)) fake-unquote body)
-                                (lambda (a)
-                                  (eval-expr body (lambda (y)
-                                                    (if (equal? x y)
-                                                        a
-                                                        (env y)))))]
-                               [(? symbol? x) (env x)]
-                               [`(quasiquote fake-unquote datum)
-                                (eval-quasi
-                                  datum
-                                  (lambda (exp) (eval-expr exp env)))]
-                               [`(fake-unquote rator fake-unquote rand)
-                                ((eval-expr rator env) (eval-expr rand env))]))])
-         (eval-expr ',q 'initial-env)))
+    `(letrec ([eval-quasi
+               (lambda (q eval)
+                 (match q
+                   [(? symbol? x) x]
+                   [`() '()]
+                   [`(,,'`unquote ,exp) (eval exp)]
+                   [`(quasiquote ,datum) ('error)]
+                   [`(,a . ,d)
+                    (cons (eval-quasi a eval)
+                          (eval-quasi d eval))]))])
+       (letrec ([eval-expr
+                 (lambda (expr env)
+                   (match expr
+                     [`(quote ,datum) datum]
+                     [`(lambda (,(? symbol? x)) ,body)
+                      (lambda (a)
+                        (eval-expr body (lambda (y)
+                                          (if (equal? x y)
+                                              a
+                                              (env y)))))]
+                     [(? symbol? x) (env x)]
+                     [`(quasiquote ,datum)
+                      (eval-quasi
+                       datum
+                       (lambda (exp) (eval-expr exp env)))]
+                     [`(,rator ,rand)
+                      ((eval-expr rator env)
+                       (eval-expr rand env))]))])
+         (eval-expr ',q
+                    'initial-env)))
     q))
 </div>
 
