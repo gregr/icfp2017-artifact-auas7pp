@@ -580,7 +580,7 @@ We point out the interesting features of the miniKanren code corresponding to ea
     Our ``cheat'' to optimize application is valid because our interpreter implements a purely functional language.  Any successful, terminating evaluation must eventually check that the value of the operator expression is a closure. What might happen if we applied this optimization to an interpreter for a language with exceptions? For a language with user-defined exceptions that can be thrown, but not caught, we might treat throwing an exception as failure. Our optimization would remain correct. However, we might instead write an interpreter for a language where exceptions can be caught, or where we want to report details of the exception rather than fail. Then the interpreter must apply the optimization only when it is guaranteed that evaluation will eventually check that the value of the operator expression is a closure. First-class control operators like <code>call/cc</code> present a similar challenge.
 </div></p>
 
-<p>Creating a variant of the interpreter for dynamic scope requires only a tiny change to the application rule: rather than extending <code>cenv, the environment from the closure, we extend <code>env</code>, the environment at the call site. We'll refer to this variant as <code>eval-dyno</code>.</p>
+<p>Creating a variant of the interpreter for dynamic scope requires only a tiny change to the application rule: rather than extending <code>cenv</code>, the environment from the closure, we extend <code>env</code>, the environment at the call site. We'll refer to this variant as <code>eval-dyno</code>.</p>
 
 We're ready to solve the challenge! Our query applies each of the two interpreters to the same unknown expression <code>expr</code>, asserting that in each interpreter <code>expr</code> evaluates to the right number.
 
@@ -628,6 +628,254 @@ Relatively simple programs in the language of <code>eval-dyno</code> can express
 <p>In the reordered query with <code>eval-lexo</code> first, the search quickly finds many partial programs that evaluate to 42 in lexical scope. Each of these programs are subsequently evaluated under dynamic scope, and as in the example above, some will never terminate. The implementation of conjunction in miniKanren assigns half of the computational effort to evaluating the first lexical scope solution under dynamic scope, a quarter to the second, an eighth to the third, and so on. That strategy works well when each evaluation quickly succeeds or fails. When those computations fail to terminate, however, later solutions are starved for time.</p>
 
 <p>Why does the query work better with <code>eval-dyno</code> first? Our <code>eval-lexo</code> language doesn't provide a form like <code>letrec</code> for direct recursion, so non-terminating programs require a more complex construction like the Z-combinator (the call-by-value Y-combinator). As a result, the programs that <code>eval-dyno</code> finds before solving our query happen to terminate in <code>eval-lexo</code>.</p>
+
+<h2><a id="append"></a>Relationality for free</h2>
+
+<p><div class=challenge>
+<b>Challenge 4.</b>
+We've seen the flexibility of the <code>appendo</code> relation in section <a href="#relational-programming-in-minikanren">1.1</a>.  Is there a way to get the same flexibility, but using the standard Racket definition of the <code>append</code> function?
+</div></p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How would you solve Challenge 4?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>One solution to this problem would be a Racket-to-miniKanren compiler, or a macro with the same functionality.
+
+However, if <code>evalo</code> implements enough of Racket to run <code>append</code>, we can solve this problem directly: we just run the Racket definition of <code>append</code> inside a query to <code>evalo</code>.</p>
+
+<p>To keep the implementation of <code>evalo</code> simple, we define <code>append</code> using <code>letrec</code> instead of <code>define</code>, and using <code>if</code> instead of <code>cond</code>.
+
+Naturally we can run <code>append</code> forwards:</p>
+
+<div class="live" id="ev-appendo-1" data-lib="evalo-standard">
+(run 1 (q)
+  (evalo
+    `(letrec ([append (lambda (l s)
+                        (if (null? l)
+                            s
+                            (cons (car l) (append (cdr l) s))))])
+       (append '(a b c) '(d e)))
+    q))
+</div>
+
+<p>Remember how we used <code>appendo</code> as a relation in section <a href="#relational-programming-in-minikanren">1.1</a>:
+<div class="live" id="ex-appendo-star" data-lib="appendo">
+(run* (q) (appendo q '(d e) '(a b c d e)))
+</div>
+
+<p>Because <code>run*</code> returned a single answer, miniKanren has proven that no other answers exist: only <code>(a b c)</code> can be prepended to <code>(d e)</code> to produce <code>(a b c d e)</code>.</p>
+
+<p>The <code>appendo</code> relation has three arguments, with the last one representing the result of appending the first two arguments. When evaluating a call to <code>append</code> in the relational interpreter, the second argument to <code>evalo</code> serves a similar purpose, representing the return value of the <code>append</code> function.</p>
+
+<p>This means we can use <code>append</code> as a relation! We pass the logic variable <code>q</code> as the first argument to <code>append</code>, using <code>unquote</code> <code>,</code> to escape the <code>quasiquote</code> <code>`</code> form wrapping the <code>letrec</code>.</p>
+
+<div class="live" id="ev-appendo-2" data-lib="evalo-standard">
+(run 1 (q)
+  (evalo
+    `(letrec ([append (lambda (l s)
+                        (if (null? l)
+                            s
+                            (cons (car l) (append (cdr l) s))))])
+       (append ,q '(d e)))
+    '(a b c d e)))
+</div>
+
+<p>It seems to work. Let's try the same query with <code>run*</code> to see whether evaluating <code>append</code> in the interpreter can replicate <code>appendo</code>'s ability to prove that only one answer exists.</p>
+
+<p>Alas, we'll be waiting a long time indeed; the <code>run*</code> query never returns a result. There are two possible causes: either there are infinitely many answers, or there are finitely many but miniKanren can't prove this. If there are many answers, a <code>run 2</code> query should terminate with two answers. If there is only the one answer, the <code>run 2</code> query should loop forever just like the <code>run*</code> query.</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+Will the <code>run 2</code> query return two answers, or will it loop forever?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p><code>run 2</code> actually terminates with these two answers:</p>
+<div class="live norun" id="app-ans">
+(('(a b c))
+ (((lambda _.0 '(a b c))) (=/= ((_.0 quote))) (sym _.0)))
+</div>
+<p>What's <code>lambda</code> doing there?</p>
+
+<p>Whereas <code>appendo</code> operates on lists, the relational interpreter operates on expressions. The first argument to <code>append</code> can be any of an infinite class of expressions that evaluate to the list <code>(a b c)</code>! And one such expression is <code>((lambda _.0 '(a b c)))</code>.
+
+The fact that we're synthesizing expressions rather than values also explains a subtle change you may have noticed in the first answer: the query finds the quotation expression <code>'(a b c)</code> rather than the value <code>(a b c)</code>.</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How can we recover the behavior of <code>appendo</code>, where <code>run*</code> proves there is only one list <code>q</code> that when prepended to <code>(d e)</code> produces <code>(a b c d e)</code>?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>The smallest of changes will do: just add a quote before the unquoted logic variable <code>q</code>. For each value, there is only one quotation expression that evaluates to that value.</p>
+<div class="live" id="ev-appendo-3" data-lib="evalo-standard">
+(run* (q)
+  (evalo
+    `(letrec ([append (lambda (l s)
+                        (if (null? l)
+                            s
+                            (cons (car l) (append (cdr l) s))))])
+       (append ',q '(d e)))
+    '(a b c d e)))
+</div>
+
+<p>We've found that <code>append</code> in the relational interpreter has all the power of the <code>appendo</code> relation implemented in miniKanren.
+
+Even better, the relational behavior of <code>append</code> and the interpreter's ability to generate expressions combine; we can now query for Racket expressions whose values satisfy a given call to <code>append</code>.</p>
+
+
+Let's go even further. Not only can we generate expressions in argument position of the call to <code>append</code>, we can generate expressions for the implementation of <code>append</code>. We can even run the (as yet partially unknown) <code>append</code> function backwards.  We can do all of these things in a single query:</p>
+<div class="live" id="ev-appendo-4" data-lib="evalo-standard">
+(run 1 (x y)
+  (evalo
+    `(letrec ([append (lambda (l s)
+                        (if (null? l)
+                            s
+                            ;; We use ,x here to leave part of the definition unknown.
+                            (cons ,x (append (cdr l) s))))])
+       (list (append ,y '(c d e)) (append '(f g h) '(i j))))
+    '((a b c d e) (f g h i j))))
+</div>
+
+<p>Let's discuss how this program is represented as a miniKanren term so that we can explain what is happening.
+
+A term can be either <em>fully instantiated</em> (containing no logic variables), <em>partially instantiated</em> (having some fixed structure, but containing one or more logic variables), or <em>fully uninstantiated</em> (a single logic variable with no associated value).
+
+In this case we've left part of the definition of <code>append</code> uninstantiated, representing the missing code with the logic variable <code>x</code>.</p>
+
+<p>The program calls <code>append</code> twice: once with the output fully instantiated but part of the input unknown, represented by the logic variable <code>y</code>, and once with fully instantiated input and output.
+
+As the relational interpreter evaluates the first call to <code>append</code>, it synthesizes assignments of <code>x</code> and <code>y</code> such that <code>(append y '(c d e))</code> evaluates to <code>(a b c d e)</code>.
+
+The second call selects from those assignments a solution with an <code>x</code> such that <code>(append '(f g h) '(i j)))</code> evaluates to <code>(f g h i j)</code>.
+
+The query instantiates <code>x</code> to the correct code snippet <code>(car l)</code>, and <code>y</code> to the correct missing argument, <code>'(a b)</code>.
+
+This query <em>simultaneously</em> performs code synthesis and bidirectional evaluation.</p>
+
+<p>At this point, it's natural to wonder how much of <code>append</code> can be synthesized with this technique.  With a straightforward, unoptimized implementation of <code>evalo</code>, only small parts of <code>append</code> can be synthesized in a reasonable amount of time.  Can we do better?  By optimizing a few key portions of <code>evalo</code>, we can in fact synthesize the entire body of <code>append</code> from just a few examples of its use!  We'll briefly describe the optimizations that enable this degree of synthesis, but these details aren't necessary for an understanding of the rest of the paper.</p>
+
+<p>The most significant optimization we implement orders goals carefully when performing procedure application.  We evaluate the operator expression first to determine whether its value is a closure.  If it's a closure, we next evaluate operand expressions that are at least partially instantiated, followed by the closure body, and then finally the fully uninstantiated operand expressions.</p>
+
+<p>This order best takes advantage of known information. Evaluating partially instantiated operand expressions is assumed to be straightforward, and doing this first means that the values of corresponding variable references in the closure body do not need to be guessed blindly. Evaluating the closure's body before evaluating uninstantiated operand expressions reduces the number of branching computations between guessing and testing: guesses about the body can be immediately tested against the expected result of the application, whereas uninstantiated operand expressions cannot be immediately tested.</p>
+
+<p>Consider this query:</p>
+<div class="live" id="ev-taglet-1" data-lib="evalo-standard">
+(run 1 (e)
+  (evalo
+    `(taglet ((x 7))
+       ((lambda (a d)
+          (cons a d))
+        ,e x))
+    '(5 . 6)))
+</div>
+
+<p>Within the body of the <code>let</code> we would first evaluate the <code>lambda</code> expression to a closure, then <code>x</code> to <code>7</code>, followed by the closure body <code>(cons a d)</code> where <code>d</code> is bound to <code>7</code> and <code>a</code> is still unknown. Only if those succeed would we start guessing terms for <code>e</code>.  In this case the query fails before we make any guesses. Evaluating the closure body produces a pair whose <code>cdr</code> is <code>7</code>, which cannot possibly fit our expected result of \schemeresult|(5 . 6)|, whose <code>cdr</code> is <code>6</code>.</p>
+
+<p>Because we are implementing a purely functional language, we can perform these reorderings without changing a program's behavior.  If evaluating <code>e</code> could produce side effects, such as mutating the value of <code>x</code>, we would have to be more careful.</p>
+
+<p>Here are some other optimizations that help a great deal:</p>
+
+<ul>
+    <li>To reduce uninformed guessing when encountering branches, we defer invoking the goals constructed by some uses of <code>conde</code> when it seems likely that more than one clause will succeed.  Deferred goals are queued up to be retried later, after all informed guesses have been made, with the hope of having learned more useful information by the time we retry.</li>
+
+    <li>Though we continue to support a complete search, we first try a depth-limited search, which prunes search branches that get very deep.  These branches are often unpromising.  If no answers are found, we fall back on the unlimited, complete search. The bias in our search described on page~\pageref{search-bias-paragraph} is also important for the remaining challenges; a simple iterative deepening search won't work.</li>
+
+    <li>To greatly reduce the expense of searching for useful conditional expressions, we restrict conditions to expressions that evaluate to Boolean constants <code>#t</code> and <code>#f</code> (as opposed to other ``true'' Racket values, such as `<code>5</code>').</li>
+
+    <li>We also perform some other minor optimizations, such as hand-tweaking the weighting of some <code>conde</code> clauses in <code>evalo</code>, favoring expression types that are more common.</li>
+</ul>
+
+<p>Let's get back to synthesizing <code>append</code>.  We'll start by providing a couple of example calls.</p>
+
+<div class="live" id="syn-app-1" data-lib="evalo-standard">
+(run 1 (defn)
+  (fresh (body)
+    (== defn `(append (lambda (xs ys) ,body)))
+    (evalo
+      `(letrec (,defn)
+         (list (append '() '())
+               (append '(1) '(2))))
+      '(() (1 2)))))
+</div>
+
+<p>This definition doesn't look right.  Although it supports our specific query, it isn't general enough to append arbitrary lists.  What went wrong?</p>
+
+<p>Because the search simply looks for any definition that works, a simple way to satisfy the constraints is to simply return our example output verbatim.  This is why we see our expected second result embedded directly in the definition.  How do we get around this?</p>
+
+<p>One solution is to prohibit the definition from mentioning our example data directly.  The constraint \mbox{<code>(absento t1 t2)</code>} prevents term <code>t1</code> from appearing anywhere in term <code>t2</code>.</p>
+
+<p class="footnote">The miniKanren implementation we use for this pearl restricts <code>t1</code> to be a literal symbol or number rather than a term. Other implementations can handle the general version of the constraint.</p>
+
+<p>We can use <code>absento</code> to prevent numbers from our examples from appearing in the definition we're synthesizing.  We provide an <code>absento</code> constraint for each number we mention.</p>
+
+<div class="live" id="syn-app-2" data-lib="evalo-standard">
+(run 1 (defn)
+  (fresh (body)
+    (absento 1 defn) (absento 2 defn)
+    (== defn `(append (lambda (xs ys) ,body)))
+    (evalo
+      `(letrec (,defn)
+         (list (append '() '())
+               (append '(1) '(2))))
+      '(() (1 2)))))
+</div>
+
+<p>Though our example result is no longer embedded in the definition, the definition still is not general enough to append arbitrary lists.  It handles exactly the cases of the empty and single element lists.  The definition can't handle larger lists because it's not recursive!</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How can we synthesize a more general version of <code>append</code>?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>Adding a couple more usage examples helps us find a more general definition.</p>
+
+<div class="live" id="syn-app-3" data-lib="evalo-standard">
+(run 1 (defn)
+  (fresh (body)
+    (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
+    (== defn `(append (lambda (xs ys) ,body)))
+    (evalo
+      `(letrec (,defn)
+         (list (append '() '())
+               (append '(1) '())
+               (append '(1) '(2))
+               (append '(1 2) '(3 4))))
+      '(() (1) (1 2) (1 2 3 4)))))
+</div>
+
+<p>This query responds with a fully general definition of <code>append</code>, implemented as a recursive procedure.
+
+Why isn't the answer, once again, specific to exactly the examples provided?
+
+Given enough examples, the simplicity of the recursive solution makes it easier to find than the overly-specific solution!</p>
+
+<p>Though we can synthesize <code>append</code> from scratch, what if a standard library were available?  Would we be able to define <code>append</code> in terms of existing definitions?  Let's try providing <code>fold-right</code>.</p>
+
+<div class="live" id="syn-app-4" data-lib="evalo-standard">
+(run 1 (defn)
+  (fresh (body)
+    (absento 1 defn) (absento 2 defn) (absento 3 defn) (absento 4 defn)
+    (== defn `(append (lambda (xs ys) ,body)))
+    (evalo
+      `(letrec ((fold-right (lambda (f acc xs)
+                              (if (null? xs) acc
+                                  (f (car xs) (fold-right f acc (cdr xs))))))
+                ,defn)
+         (list (append '() '())
+               (append '(1) '())
+               (append '(1) '(2))
+               (append '(1 2) '(3 4))))
+      '(() (1) (1 2) (1 2 3 4)))))
+</div>
+
+<p>With <code>fold-right</code> available in the environment, <code>append</code> is quickly defined in terms of it!</p>
+
+<p>While our optimized relational interpreter can both synthesize recursive functions and take advantage of higher-order functions, it struggles with larger programs. The search space grows exponentially with the size of the smallest correct definition of the program to be synthesized. Our current implementation can't synthesize complete recursive programs much larger than <code>append</code>.</p>
 
 <h2><a id="proof-checker"></a>A tiny theorem prover</h2>
 
@@ -679,7 +927,7 @@ How would you solve Challenge 6?
 <div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
 </div></p>
 
-<p>How might we write our tiny prover? A simple (though inefficient) algorithm might use a goal-directed, breadth-first search, which is complete over infinite trees. But miniKanren \emph{already} implements a complete, goal directed search! What happens if we just run the proof checker in the relational interpreter we've used for the previous challenges?</p>
+<p>How might we write our tiny prover? A simple (though inefficient) algorithm might use a goal-directed, breadth-first search, which is complete over infinite trees. But miniKanren <em>already</em> implements a complete, goal directed search! What happens if we just run the proof checker in the relational interpreter we've used for the previous challenges?</p>
 
 <p>Just as we treated the function <code>append</code> as a relation by running it inside the relational interpreter, we can treat the <code>proof?</code> function as a relation that connects assumptions, proofs, and conclusions. Here we query the <code>proof?</code> function to generate proofs of a theorem, given a set of assumptions:</p>
 
