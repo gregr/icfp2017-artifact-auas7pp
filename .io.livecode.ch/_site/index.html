@@ -31,7 +31,7 @@ After lists, the many forms for expressing a computation in Racket take time to 
 To address both of these points, I've created 99 roughly tweet-sized expressions in Racket that all evaluate to the list <code>'(I love you)</code>.
 </blockquote>
 
-<p>Racket prints the list value <code>(I love you)</code> as the quotation expression <code>'(I love you)</code>, and Might follows this convention. In this paper we show just the value. To replicate our results in Racket, evaluate <code>(print-as-expression #f)</code> before the examples.</p>
+<p class="footnote">Racket prints the list value <code>(I love you)</code> as the quotation expression <code>'(I love you)</code>, and Might follows this convention. In this paper we show just the value. To replicate our results in Racket, evaluate <code>(print-as-expression #f)</code> before the examples.</p>
 
 <p>These examples, such as the three below, introduce students to an assortment of Racket's features.</p>
 
@@ -133,7 +133,7 @@ The original <code>append</code> function can be used to concatenate two lists:
 (run* (q) (appendo q '(d e) '(a b c d e)))
 </div>
 
-<p>These examples treating list concatenation as a relation will be familiar to any Prolog programmer.</p>
+<p class="footnote">These examples treating list concatenation as a relation will be familiar to any Prolog programmer.</p>
 
 <p>A query needn't produce only a single answer. We can also infer all pairs of lists <code>x</code> and <code>y</code> that when appended together produce <code>(a b c d e)</code></p>
 
@@ -247,7 +247,7 @@ For example,</p>
 
 <p>The good news is that <code>evalo</code> actually exists!  We've written an interpreter for a small&mdash;but interesting and Turing-complete&mdash;subset of Racket, including first-class multi-argument and variadic functions, <code>letrec</code> for defining recursive definitions, and a simple pattern matcher.</p>
 
-<p>Other than the pattern matcher, the language supported by <code>evalo</code> is also a subset of Scheme.</p>
+<p class="footnote">Other than the pattern matcher, the language supported by <code>evalo</code> is also a subset of Scheme.</p>
 
 <p>
 Our <code>evalo</code> is inspired by, but significantly extends, the relational interpreter given in Byrd et al. (2012).
