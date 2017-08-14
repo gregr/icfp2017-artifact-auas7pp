@@ -877,6 +877,147 @@ Given enough examples, the simplicity of the recursive solution makes it easier 
 
 <p>While our optimized relational interpreter can both synthesize recursive functions and take advantage of higher-order functions, it struggles with larger programs. The search space grows exponentially with the size of the smallest correct definition of the program to be synthesized. Our current implementation can't synthesize complete recursive programs much larger than <code>append</code>.</p>
 
+<h2><a id="refutation"></a>Taking Test-Driven Development Seriously</h2>
+
+<p>Test-driven development asks us to write our test cases before we write our programs, so that we can receive immediate feedback on the code we've written.
+
+Say we're writing a program <code>remove</code> that removes all occurrences of a symbol <code>x</code> that occur as top-level elements in a list <code>ls</code>.
+
+Our first job is to describe <code>remove</code> with a set of tests:</p>
+
+<div class="live" id="ex-remove-1">
+(list (remove 'foo '())
+      (remove 'foo '(foo))
+      (remove 'foo '(1))
+      (remove 'foo '(2 foo 3))
+      (remove 'foo '((4 foo) foo (5 (foo 6 foo)) foo 7 foo (8))))
+</div>
+
+<p>Let's pretend that after thinking over the cases that our function must handle, we have written the program skeleton below.  Here <code>A</code>, <code>B</code>, and <code>C</code> represent ``holes,'' which are expressions we've yet to fill in.</p>
+<div class="live norun" id="def-remove-1">
+(define remove
+  (lambda (x ls)
+    (cond
+      [(null? ls) '()]
+      [(equal? (car ls) x) (cons A B)]
+      .
+      C)))
+</div>
+
+<p>We've already made a mistake! Though the program isn't complete, there is no way to fill in the holes to form a definition of <code>remove</code> that matches our tests.
+
+Sadly, test-driven development in a typical programming environment doesn't help us: we can't run tests on an incomplete program.</p>
+
+<p><div class=challenge>
+<b>Challenge 5.</b>
+How can we determine that we've already made a mistake?
+</div></p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+How would you solve Challenge 5?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>Using our relational interpreter we actually <em>can</em> run the test suite with our incomplete program, by representing any holes with (unquoted) logic variables.
+<div class="live hidden" id="evalo-optimized-f">
+(load "evalo-optimized.scm")
+(set! allow-incomplete-search? #f)
+</div>
+<div class="live" id="run-remove-1" data-lib="evalo-optimized-f">
+(run 1 (A B C)
+  (evalo
+    `(letrec ([remove (lambda (x ls)
+                        (cond
+                          [(null? ls) '()]
+                          [(equal? (car ls) x) (cons ,A ,B)]
+                          .
+                          ,C)) ])
+       (list (remove 'foo '())
+             (remove 'foo '(foo))
+             (remove 'foo '(1))
+             (remove 'foo '(2 foo 3))
+             (remove 'foo '((4 foo) foo (5 (foo 6 foo)) foo 7 foo (8)))))
+    '(() () (1) (2 3) ((4 foo) (5 (foo 6 foo)) 7 (8)))))
+</div>
+
+<p>Our query responds almost immediately with the empty answer set.  Because miniKanren uses a complete search that is guaranteed to find an answer if one exists, the empty answer set means there is no correct way to synthesize expressions to fill in the holes.  We've proved that an incomplete program is inconsistent with its test cases!  We call such a proof a <em>refutation</em> of the program.</p>
+
+<p>It's worth pausing for a moment to discuss how refutation works, and how it can be so fast.  We mentioned that the underlying system runs a complete search, and it may be tempting to assume the search uses blind, brute force.  But this search isn't blind.  By working top-down, connecting expected result values to the outer expression shapes being considered, the search can prune unpromising branches very early on.  It's only after the outer expression shape is shown to be compatible with the desired result that sub-expressions are considered.</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+We know our program is wrong.  How do we figure out <em>where</em> it went wrong?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>By attempting to satisfy tests individually, we can get a hint at the problem.</p>
+
+<p class="footnote">In general, all test subsets may need to be checked since a subset may fail even if all its tests are individually satisfiable.</p>
+
+<p>In this case, the only unsatisfiable test is:</p>
+
+<p><code>(remove 'foo '(foo)) => ()</code></p>
+
+<p>This failing test suggests <code>remove</code> does not work correctly when the first list element is the item to be removed.  If we relax a portion of our program by forming more or larger expression holes, looking for the moment our test becomes satisfiable, we can narrow down the problem.  In this case, we are able to satisfy our query by relaxing the right-hand-side expression of our equality clause.</p>
+
+<div class="live" id="run-remove-2" data-lib="evalo-optimized-f">
+(run 1 (A B C)
+  (evalo
+    `(letrec ([remove (lambda (x ls)
+                        (cond
+                          [(null? ls) '()]
+                          [(equal? (car ls) x) ,A]
+                          .
+                          ,C)) ])
+       (remove 'foo '(foo)))
+    '()))
+</div>
+
+<p>The test now passes, suggesting it was a mistake to try <code>(cons ,A ,B)</code> in the equality clause;
+the clause should produce the empty list, not a pair.  With this insight, we can continue implementing <code>remove</code>.</p>
+
+<p>Let's try the related problem of removing a symbol from anywhere in an s-expression, even inside deeply nested lists.  Our test suite should return slightly different answers:</p>
+
+<div class="live" id="ex-remove-2">
+(list (remove 'foo '())
+      (remove 'foo '(foo))
+      (remove 'foo '(1))
+      (remove 'foo '(2 foo 3))
+      (remove 'foo '((4 foo) foo (5 (foo 6 foo)) foo 7 foo (8))))
+</div>
+
+<p>Using <code>evalo</code> to run our program as we write it, we notice a refutation:</p>
+<div class="live" id="run-remove-3" data-lib="evalo-optimized-f">
+(run 1 (A B)
+  (evalo
+    `(letrec ([remove (lambda (x ls)
+                        (cond
+                          [(null? ls) '()]
+                          [(equal? (car ls) x) ,A]
+                          [else (cons (car ls) ,B)]))])
+       (list (remove 'foo '())
+             (remove 'foo '(foo))
+             (remove 'foo '(1))
+             (remove 'foo '(2 foo 3))
+             (remove 'foo '((4 foo) foo (5 (foo 6 foo)) foo 7 foo (8)))))
+    '(() () (1) (2 3) ((4) (5 (6)) 7 (8)))))
+</div>
+
+<p>Checking each test individually, we learn that our last test case is unsatisfiable.</p>
+
+<p>Relaxing expressions that contain logic variables suggests a problem with the right-hand-side of our <code>else</code> clause. Using <code>(cons (car ls) ,B)</code> causes the last test to fail, while <code>(cons ,C ,B)</code> does not.</p>
+
+<p><div class=stopthink>
+<b>Stop and think:</b>
+What is wrong with this partial definition of <code>remove</code>?
+<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
+</div></p>
+
+<p>The problematic right-hand-side <code>(cons (car ls) ,B)</code> always constructs a pair containing the <code>car</code> of <code>ls</code> as the first element, even if the <code>car</code> contains the symbol we wish to remove.  In other words, there is never a recursive call on the <code>car</code> of <code>ls</code>.  If we look at the list passed to <code>remove</code> in the failing test case, we notice that its first element is itself a list containing the item we'd like to remove.  If the first element of <code>ls</code> is a list, we need to process it before including it in our result.  Adding a \mbox{\schemeresult|[(pair? (car ls)) ...]|} clause after the <code>[(null? ls) ...]</code> clause allows our test to be satisfied.</p>
+
+<p>The debugging steps in this section are tedious to use by hand, but they could provide rich interactive feedback if automatically executed by an interactive development environment. It is interesting that we're able to refute programs without needing the support of a type system (though it is possible to combine a type inferencer, written as a relation, with the interpreter).</p>
+
 <h2><a id="proof-checker"></a>A tiny theorem prover</h2>
 
 <p>Here's a tiny proof-checker for propositional logic, written in Racket:</p>
