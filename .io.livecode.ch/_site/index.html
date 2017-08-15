@@ -50,16 +50,16 @@ To address both of these points, I've created 99 roughly tweet-sized expressions
 
 <p>Inspired by a love of Racket, and a love of the list <code>(I love you)</code>, we want to go even further.</p>
 
-<p><div class=challenge>
+<div class=challenge><p>
 <b>Challenge 1.</b>
 Come up with 99,000 Racket expressions that evaluate to the list <code>(I love you)</code>, demonstrating a variety of expression types in the spirit of the blog post.
-</div></p>
+</p></div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 1?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>We could follow Might's approach, and write the 99,000 Racket expressions by hand.
 
@@ -264,11 +264,11 @@ The even better news is that we can use <code>evalo</code> to generate expressio
 
 
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 Construct a miniKanren query that uses <code>evalo</code> to solve Challenge 1.
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 
 <p>Let's start off small, by generating just a single expression that evaluates to <code>(I love you)</code>:</p>
@@ -340,11 +340,11 @@ Therefore <code>_.1</code> may be replaced by <em>any</em> legal Racket expressi
 
 <p>There's something important happening in miniKanren's implementation to make these queries work. We can think of all the ways of constructing an expression as forming an infinite tree, branching at every point where a different kind of subexpression could be selected. The execution of the <code>evalo</code> relational interpreter searches through this tree for expressions that evaluate to <code>(I love you)</code>.</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 Does it matter what search strategy miniKanren uses?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>In fact, the search strategy matters a great deal.<a id="search-bias-paragraph"></a> Searching an infinite tree requires care: for example, depth-first search could get stuck considering an infinite subtree that doesn't contain answers to our query. Even when depth-first search does find answers in an infinite tree, it might find only one kind of answer rather than the variety of answers we're looking for. Our example programs might then only use <code>list</code> and <code>car</code>, but never <code>lambda</code>. Thus it is important that miniKanren uses a complete search, which interleaves the processes of searching different parts of the tree [Kiselyov et al. 2005]. Our interleaving search also biases towards branches which have shown progress in the form of intermediate results, rewarding them with an increased share of the search effort. This bias allows miniKanren's search to investigate promising branches much more deeply than would unbiased complete searches like breadth-first and iterative deepening depth-first search.</p>
 
@@ -377,16 +377,16 @@ evaluation function, <code>value</code>, and then offers this challenge [McCarth
 Difficult mathematical type exercise: Find a list e such that <code>value e = e</code>.
 </blockquote>
 
-<p><div class=challenge>
+<div class=challenge><p>
 <b>Challenge 1.</b>
 Solve McCarthy's exercise by finding a list <code>e</code> that evaluates to itself in Racket.
-</div></p>
+</p></div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 1?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>We could try to construct such a list by hand, either through trial-and-error or through cleverness.
 
@@ -397,11 +397,11 @@ If we were of a more theoretical bent, we could use Kleene's second recursion th
 
 We can once again use <code>evalo</code>, the relational interpreter we describe in section <a href="#a-relational-interpreter">1.2</a>.</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 Write a miniKanren query that uses <code>evalo</code> to find an expression <code>e</code> that evaluates to itself.
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>It's actually very simple to write such a query&mdash;just use the query variable as both the first and second arguments to <code>evalo</code> (representing the ``input'' expression and ``output'' value, respectively):</p>
 
@@ -447,10 +447,10 @@ If we replace the <code>run 1</code> in our query with <code>run 3</code>, we ge
  '(lambda (_.0) (list _.0 (list 'quote _.0))))
 </div>
 
-<p><div class="aside">
+<div class="aside"><p>
 <b>Fun fact:</b>
 Though McCarthy describes finding quines as a ``difficult mathematical type exercise,'' the quine-generating query is the <em>simplest</em> possible query involving <code>evalo</code>, in that it contains the minimal number of distinct symbols.
-</div></p>
+</p></div>
 
 <p>The side-conditions in the second part of the answer tell us that <code>_.0</code> can be any legal Racket identifier, other than <code>closure</code>, <code>list</code>, <code>prim</code>, or <em>quote</em>.
 
@@ -507,7 +507,7 @@ if we unify <code>e</code> with the pair <code>`(,a . ,d)</code>, forcing <code>
 
 <p>where, once again, <code>_.0</code> can be any legal Racket identifier, other than <code>closure</code>, <code>list</code>, <code>prim</code>, or <em>quote</em>.  Importantly, <code>_.0</code> must have the same value in both <code>p</code> and <code>q</code>.<p>
 
-<p><div class="insight">
+<div class="insight"><p>
 <b>Insight:</b>
   ``Lazy constraints''&mdash;such as the disequality constraint <code>=/=</code> and the <code>numbero</code> constraint used to construct the <code>num</code> side-condition&mdash;are an important part of constraint logic programming [Jaffar and Lassez 1987] that we take advantage of here.  These constraints are critical to the performance of <code>evalo</code>.
 
@@ -516,13 +516,13 @@ The abstract representation of a number allowed by the <code>numbero</code> cons
 Disequality constraints provide an important form of negation.
 
 Using unification alone, disequality between terms must be expressed by enumerating all possible combinations of values that differ, making twine generation hopelessly inefficient.
-</div></p>
+</p></div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 Write a query that generates a <code>thrine</code>---that is, three distinct expressions <code>p</code>, <code>q</code>, and <code>r</code> such that <code>p</code> evaluates to <code>q</code>, <code>q</code> evaluates to <code>r</code>, and <code>r</code> evaluates to <code>p</code>.
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>Here is the thrine-generating query, which requires a disequality constraint for each pairing of <code>p</code>, <code>q</code>, and <code>r</code>:</p>
 
@@ -542,20 +542,20 @@ The thrines-generating query may not find a thrine before running out of memory,
 
 <h2><a id="lexical-vs-dynamic" href="#lexical-vs-dynamic">3</a> &nbsp; Lexical vs. dynamic scope</h2>
 
-<p><div class=challenge>
+<div class=challenge><p>
 <b>Challenge 3.</b>
 Many students struggle with the concept of lexical scope versus dynamic scope.
 
 To help these students out, generate 100 expressions that evaluate to 42 under lexical scope, and 137 under dynamic scope.
 
 To help focus on issues of scope, use a restricted subset of Racket that corresponds to the call-by-value &lambda;-calculus extended with numeric constants.
-</div></p>
+</p></div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 3?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>We've seen that we can synthesize programs that evaluate to a particular value&mdash;such as <code>(I love you)</code>&mdash;using a relational interpreter. Our solution to this challenge evaluates an unknown expression simultaneously in <em>two</em> relational interpreters: one implementing lexical scope and one implementing dynamic scope.</p>
 
@@ -581,12 +581,12 @@ We point out the interesting features of the miniKanren code corresponding to ea
     <li> <b>app</b> The <code>ext-envo</code> relation extends the environment by unifying <code>new-env</code> with <code>`((,x . ,val) . ,cenv)</code>.</li>
 </ul>
 
-<p><div class="insight">
+<div class="insight"><p>
 <b>Insight:</b>
     These semantics don't exactly correspond to a subset of Racket. We only care about the behavior of programs that terminate and don't produce errors. As such, we can cheat a little and get away with it! For example, our interpreter won't evaluate the remaining expressions in an application if the first expression, the operator, doesn't evaluate to a closure. In Racket, <code>(5 ((lambda (x) (x x)) (lambda (x) (x x))))</code> loops infinitely, but its evaluation in <code>eval-lexo</code> terminates with failure. Even better, our optimization makes the evaluation of the application <code>(5 e)</code>, where <code>e</code> is an unknown expression, terminate with failure as well. Without this optimization, miniKanren would have to generate, and evaluate, each of the infinitely many possible expressions <code>e</code>.
 
     Our ``cheat'' to optimize application is valid because our interpreter implements a purely functional language.  Any successful, terminating evaluation must eventually check that the value of the operator expression is a closure. What might happen if we applied this optimization to an interpreter for a language with exceptions? For a language with user-defined exceptions that can be thrown, but not caught, we might treat throwing an exception as failure. Our optimization would remain correct. However, we might instead write an interpreter for a language where exceptions can be caught, or where we want to report details of the exception rather than fail. Then the interpreter must apply the optimization only when it is guaranteed that evaluation will eventually check that the value of the operator expression is a closure. First-class control operators like <code>call/cc</code> present a similar challenge.
-</div></p>
+</p></div>
 
 <p>Creating a variant of the interpreter for dynamic scope requires only a tiny change to the application rule: rather than extending <code>cenv</code>, the environment from the closure, we extend <code>env</code>, the environment at the call site. We'll refer to this variant as <code>eval-dyno</code>.</p>
 
@@ -620,7 +620,7 @@ Relatively simple programs in the language of <code>eval-dyno</code> can express
 <p><div class=stopthink>
 <b>Stop and think:</b>
     Why does the evaluation of this expression never terminate with dynamic scope?
-</div></p>
+</p></div>
 
 <p>After the outermost function application, the subexpression</p>
 <div class="live norun" id="ex-scoping-2">
@@ -639,16 +639,16 @@ Relatively simple programs in the language of <code>eval-dyno</code> can express
 
 <h2><a id="append" href="#append">4</a> &nbsp; Relationality for free</h2>
 
-<p><div class=challenge>
+<div class=challenge><p>
 <b>Challenge 4.</b>
 We've seen the flexibility of the <code>appendo</code> relation in section <a href="#relational-programming-in-minikanren">1.1</a>.  Is there a way to get the same flexibility, but using the standard Racket definition of the <code>append</code> function?
-</div></p>
+</p></div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 4?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>One solution to this problem would be a Racket-to-miniKanren compiler, or a macro with the same functionality.
 
@@ -695,11 +695,11 @@ Naturally we can run <code>append</code> forwards:</p>
 
 <p>Alas, we'll be waiting a long time indeed; the <code>run*</code> query never returns a result. There are two possible causes: either there are infinitely many answers, or there are finitely many but miniKanren can't prove this. If there are many answers, a <code>run 2</code> query should terminate with two answers. If there is only the one answer, the <code>run 2</code> query should loop forever just like the <code>run*</code> query.</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 Will the <code>run 2</code> query return two answers, or will it loop forever?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p><code>run 2</code> actually terminates with these two answers:</p>
 <div class="live norun" id="app-ans">
@@ -712,11 +712,11 @@ Will the <code>run 2</code> query return two answers, or will it loop forever?
 
 The fact that we're synthesizing expressions rather than values also explains a subtle change you may have noticed in the first answer: the query finds the quotation expression <code>'(a b c)</code> rather than the value <code>(a b c)</code>.</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How can we recover the behavior of <code>appendo</code>, where <code>run*</code> proves there is only one list <code>q</code> that when prepended to <code>(d e)</code> produces <code>(a b c d e)</code>?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>The smallest of changes will do: just add a quote before the unquoted logic variable <code>q</code>. For each value, there is only one quotation expression that evaluates to that value.</p>
 <div class="live" id="ev-appendo-3" data-lib="evalo-standard">
@@ -834,11 +834,11 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
 
 <p>Though our example result is no longer embedded in the definition, the definition still is not general enough to append arbitrary lists.  It handles exactly the cases of the empty and single element lists.  The definition can't handle larger lists because it's not recursive!</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How can we synthesize a more general version of <code>append</code>?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>Adding a couple more usage examples helps us find a more general definition.</p>
 
@@ -916,16 +916,16 @@ Our first job is to describe <code>remove</code> with a set of tests:</p>
 
 Sadly, test-driven development in a typical programming environment doesn't help us: we can't run tests on an incomplete program.</p>
 
-<p><div class=challenge>
+<div class=challenge><p>
 <b>Challenge 5.</b>
 How can we determine that we've already made a mistake?
-</div></p>
+</p></div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 5?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>Using our relational interpreter we actually <em>can</em> run the test suite with our incomplete program, by representing any holes with (unquoted) logic variables.
 <div class="live hidden" id="evalo-optimized-f">
@@ -953,11 +953,11 @@ How would you solve Challenge 5?
 
 <p>It's worth pausing for a moment to discuss how refutation works, and how it can be so fast.  We mentioned that the underlying system runs a complete search, and it may be tempting to assume the search uses blind, brute force.  But this search isn't blind.  By working top-down, connecting expected result values to the outer expression shapes being considered, the search can prune unpromising branches very early on.  It's only after the outer expression shape is shown to be compatible with the desired result that sub-expressions are considered.</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 We know our program is wrong.  How do we figure out <em>where</em> it went wrong?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>By attempting to satisfy tests individually, we can get a hint at the problem.</p>
 
@@ -1016,11 +1016,11 @@ the clause should produce the empty list, not a pair.  With this insight, we can
 
 <p>Relaxing expressions that contain logic variables suggests a problem with the right-hand-side of our <code>else</code> clause. Using <code>(cons (car ls) ,B)</code> causes the last test to fail, while <code>(cons ,C ,B)</code> does not.</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 What is wrong with this partial definition of <code>remove</code>?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>The problematic right-hand-side <code>(cons (car ls) ,B)</code> always constructs a pair containing the <code>car</code> of <code>ls</code> as the first element, even if the <code>car</code> contains the symbol we wish to remove.  In other words, there is never a recursive call on the <code>car</code> of <code>ls</code>.  If we look at the list passed to <code>remove</code> in the failing test case, we notice that its first element is itself a list containing the item we'd like to remove.  If the first element of <code>ls</code> is a list, we need to process it before including it in our result.  Adding a \mbox{\schemeresult|[(pair? (car ls)) ...]|} clause after the <code>[(null? ls) ...]</code> clause allows our test to be satisfied.</p>
 
@@ -1065,16 +1065,16 @@ For example, we can check this proof that <code>C</code> holds, assuming <code>A
                  (A (A (A => B) (B => C)) assumption ()))))))
 </div>
 
-<p><div class=challenge>
+<div class=challenge><p>
 <b>Challenge 6.</b>
 Write a tiny theorem prover for the logic of the proof checker, <code>proof?</code>.
-</div></p>
+</p></div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 6?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>How might we write our tiny prover? A simple (though inefficient) algorithm might use a goal-directed, breadth-first search, which is complete over infinite trees. But miniKanren <em>already</em> implements a complete, goal directed search! What happens if we just run the proof checker in the relational interpreter we've used for the previous challenges?</p>
 
@@ -1149,10 +1149,10 @@ How would you solve Challenge 6?
 
 <h2><a id="scheme-in-scheme" href="#scheme-in-scheme">7</a> &nbsp; Quines, revisited</h2>
 
-<p><div class=challenge>
+<div class=challenge><p>
 <b>Challenge 7.</b>
 Generate a quine that uses <code>quasiquote</code> instead of <code>list</code> or <code>cons</code>.
-</div></p>
+</p></div>
 
 
 <p>The quines using <code>list</code> and <code>cons</code> generated in section <a href="#quines">2</a> are a little verbose.
@@ -1163,11 +1163,11 @@ Sadly, our <code>evalo</code> relational interpreter doesn't include the <code>q
 
 We could extend the interpreter to add it, but is there another way?</p>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 7 without modifying the relational interpreter?
-<div style="text-align:center;"><img width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></img></div>
-</div></p>
+<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</p></div>
 
 <p>Unlike <code>append</code>, <code>quasiquote</code> can't be implemented as a function, since it does not directly evaluate its argument, but rather interprets its argument to find <code>unquote</code> forms. Thus we can't simply define <code>quasiquote</code> in the interpreter with <code>letrec</code>.
 
@@ -1223,10 +1223,10 @@ We use the same technique to fail upon variable lookup in the empty environment,
 
 <p>A nested <code>letrec</code> is necessary because our standard version of <code>evalo</code> does not support mutually-recursive definitions, though the optimized <code>evalo</code> used earlier does support mutual recursion.</p>
 
-<p><div class="insight">
+<div class="insight"><p>
 <b>Insight:</b>
 The outer, relational interpreter must use a first-order representation of environments and closures, as miniKanren only supports first-order terms. However, our Racket-in-Racket can use higher order representations thanks to its meta-circular use of that outer implementation. Environments are represented as functions that accept a symbol and return the value to which it is bound.  When extending an environment, we wrap it in a new function that first checks a variable against the new binding.  If the variable doesn't match, the new function delegates to the original environment by calling the function representing it.
-</div></p>
+</p></div>
 
 <p>The meta-circular evaluator uses pattern matching to recognize each form of expression. In the relational setting it's even more important than usual to specify programs unambiguously.  Consider what might happen if rather than using <code>match</code>, we were to use this conditional expression to recognize the syntax for a <code>lambda</code> expression:</p>
 
