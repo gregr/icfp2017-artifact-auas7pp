@@ -237,6 +237,10 @@ This interpreter&mdash;which we might call <code>evalo</code>&mdash;would take t
 
 For example,</p>
 
+<div class="live hidden" id="evalo-small">
+(load "evalo-small.scm")
+</div>
+
 <div class="live hidden" id="evalo-standard">
 (load "evalo-standard.scm")
 </div>
@@ -478,7 +482,7 @@ if we unify <code>e</code> with the pair <code>`(,a . ,d)</code>, forcing <code>
 
 <p>We can also use <code>evalo</code> to generate <em>twines</em>&mdash;two distinct expressions <code>p</code> and <code>q</code> such that <code>p</code> evaluates to <code>q</code> and <code>q</code> evaluates to <code>p</code>:</p>
 
-<div class="live" id="ex-twines-1" data-lib="evalo-standard">
+<div class="live" id="ex-twines-1" data-lib="evalo-small">
 (run 1 (p q)
   (=/= p q)
   (evalo p q)
@@ -522,7 +526,7 @@ Write a query that generates a <code>thrine</code>---that is, three distinct exp
 
 <p>Here is the thrine-generating query, which requires a disequality constraint for each pairing of <code>p</code>, <code>q</code>, and <code>r</code>:</p>
 
-<div class="live" id="ex-thrines-1" data-lib="evalo-standard">
+<div class="live" id="ex-thrines-1" data-lib="evalo-small">
 (run 1 (p q r)
   (=/= p q)
   (=/= p r)
