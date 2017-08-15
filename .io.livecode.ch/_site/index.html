@@ -617,7 +617,7 @@ Relatively simple programs in the language of <code>eval-dyno</code> can express
    42))
 </div>
 
-<p><div class=stopthink>
+<div class=stopthink><p>
 <b>Stop and think:</b>
     Why does the evaluation of this expression never terminate with dynamic scope?
 </p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
@@ -736,7 +736,7 @@ How can we recover the behavior of <code>appendo</code>, where <code>run*</code>
 Even better, the relational behavior of <code>append</code> and the interpreter's ability to generate expressions combine; we can now query for Racket expressions whose values satisfy a given call to <code>append</code>.</p>
 
 
-Let's go even further. Not only can we generate expressions in argument position of the call to <code>append</code>, we can generate expressions for the implementation of <code>append</code>. We can even run the (as yet partially unknown) <code>append</code> function backwards.  We can do all of these things in a single query:</p>
+<p>Let's go even further. Not only can we generate expressions in argument position of the call to <code>append</code>, we can generate expressions for the implementation of <code>append</code>. We can even run the (as yet partially unknown) <code>append</code> function backwards.  We can do all of these things in a single query:</p>
 <div class="live" id="ev-appendo-4" data-lib="evalo-standard">
 (run 1 (x y)
   (evalo
@@ -1292,7 +1292,7 @@ Eric Holk and Dan Friedman worked with co-author Byrd on quine generation in min
 <li>William E. Byrd and Daniel P. Friedman. 2006. <em>From Variadic Functions to Variadic Relations: A miniKanren Perspective.</em> Scheme and Functional Programming Workshop.</li>
 <li>William E. Byrd, Eric Holk, and Daniel P. Friedman. 2012. <em>miniKanren, Live and Untagged: Quine Generation via Relational Interpreters (Programming Pearl).</em> Scheme and Functional Programming Workshop. <a href="https://doi.org/10.1145/2661103.2661105">DOI</a>.</li>
 <li>Daniel P. Friedman, William E. Byrd, and Oleg Kiselyov. 2005. <em>The Reasoned Schemer.</em> The MIT Press, Cambridge, MA, USA.</li>
-<li>Douglas R. Hofstadter. 1979. <em>Gödel, Escher, Bach : an Eternal Golden Braid.</em> Basic, New York, NY, USA.</li>
+<li>Douglas R. Hofstadter. 1979. <em>G&ouml;del, Escher, Bach : an Eternal Golden Braid.</em> Basic, New York, NY, USA.</li>
 <li>J. Jaffar and J.-L. Lassez. 1987. Constraint Logic Programming. In POPL. <a href="https://doi.org/10.1145/41625.41635">DOI</a>.</li>
 <li>Oleg Kiselyov, Chung-chieh Shan, Daniel P. Friedman, and Amr Sabry. 2005. <em>Backtracking, Interleaving, and Terminating Monad Transformers: (Functional Pearl).</em> In ICFP. <a href="https://doi.org/10.1145/1086365.1086390">DOI</a></li>
 <li>Stephen Cole Kleene. 1952. <em>Introduction to Metamathematics.</em> North-Holland, Amsterdam.</li>
