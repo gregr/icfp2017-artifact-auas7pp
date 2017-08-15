@@ -771,10 +771,10 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
 <p>This order best takes advantage of known information. Evaluating partially instantiated operand expressions is assumed to be straightforward, and doing this first means that the values of corresponding variable references in the closure body do not need to be guessed blindly. Evaluating the closure's body before evaluating uninstantiated operand expressions reduces the number of branching computations between guessing and testing: guesses about the body can be immediately tested against the expected result of the application, whereas uninstantiated operand expressions cannot be immediately tested.</p>
 
 <p>Consider this query:</p>
-<div class="live" id="ev-taglet-1" data-lib="evalo-standard">
+<div class="live" id="ev-let-1" data-lib="evalo-optimized">
 (run 1 (e)
   (evalo
-    `(taglet ((x 7))
+    `(let ((x 7))
        ((lambda (a d)
           (cons a d))
         ,e x))
