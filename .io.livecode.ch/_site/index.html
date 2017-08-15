@@ -23,7 +23,7 @@ By placing logic variables representing unknowns in different positions within t
 <p>The problem in section <a href="#quines">2</a> is taken directly from Byrd et al. (2012), and the problem from section <a href="#i-love-you">1</a> is a simple variant of an example in that work.
 We include these problems to provide background and understanding for the problems in sections <a href="#lexical-vs-dynamic">3</a> through <a href="#scheme-in-scheme">7</a>, which are all novel.<p>
 
-<h2><a id="i-love-you"></a>99,000 ways to say (I love you) in Racket</h2>
+<h2><a id="i-love-you" href="#i-love-you">1</a> &nbsp; 99,000 ways to say (I love you) in Racket</h2>
 
 <p>In his Valentine's Day blog post, "99 ways to say <code>'(I love you)</code> in Racket," one of the authors [<a href="http://matt.might.net/articles/i-love-you-in-racket/">Might 2013</a>] writes:
 
@@ -78,7 +78,7 @@ What if instead of writing a normal interpreter, we implemented the evaluation r
 To understand this approach we must first learn a little about how to write relations in <em>miniKanren</em>,
 an embedded domain specific language for constraint logic programming [Byrd and Friedman 2006; Friedman et al. 2005].</p>
 
-<h3><a id="relational-programming-in-minikanren"></a>Relational Programming in miniKanren</h3>
+<h3><a id="relational-programming-in-minikanren" href="#relational-programming-in-minikanren">1.1</a> &nbsp; Relational Programming in miniKanren</h3>
 
 <p>Let's take list concatenation as our example. Here's how we might define <code>append</code> in Racket:</p>
 
@@ -225,7 +225,7 @@ Since both clauses succeed, the entire <code>conde</code> expression succeeds tw
 
 Each answer consists of a list of values unified with query variables, followed by any additional side conditions introduced by lazy constraints.  In this case, there is only a single answer unifying a single query variable to a value that happens to be a list, resulting in a triply-nested list.  Here the single answer found unifies <code>q</code> with <code>(a b c d e)</code>. If we wanted miniKanren to stop searching after producing the first answer rather than continuing until it can prove there are no more, we could use \mbox{<code>run 1</code>} rather than <code>run*</code>.</p>
 
-<h3><a id="a-relational-interpreter"></a>Loving Lists via a Relational Interpreter</h3>
+<h3><a id="a-relational-interpreter" href="#a-relational-interpreter">1.2</a> &nbsp; Loving Lists via a Relational Interpreter</h3>
 
 <p>As we just saw, by treating list concatenation as a relation instead of a function we get additional, useful behavior.
 
@@ -364,7 +364,7 @@ Does it matter what search strategy miniKanren uses?
 
 <p>Both answers include a <code>num</code> side-condition, which we've replaced with the number <code>42</code> so that the expressions will run without error in Racket.</p>
 
-<h2><a id="quines"></a>Quines, twines, and thrines!  Oh my!</h2>
+<h2><a id="quines" href="#quines">2</a> &nbsp; Quines, twines, and thrines!  Oh my!</h2>
 
 <p>In his classic paper, `A micro-manual for LISP &ndash; Not the whole
 truth,' John McCarthy describes the rules for a LISP
@@ -536,7 +536,7 @@ Write a query that generates a <code>thrine</code>---that is, three distinct exp
 
 The thrines-generating query may not find a thrine before running out of memory, unless some of the primitives and forms are removed from the <code>evalo</code> relation, which reduces the branching factor of the search.</p>
 
-<h2><a id="lexical-vs-dynamic"></a>Lexical vs. dynamic scope</h2>
+<h2><a id="lexical-vs-dynamic" href="#lexical-vs-dynamic">3</a> &nbsp; Lexical vs. dynamic scope</h2>
 
 <p><div class=challenge>
 <b>Challenge 3.</b>
@@ -633,7 +633,7 @@ Relatively simple programs in the language of <code>eval-dyno</code> can express
 
 <p>Why does the query work better with <code>eval-dyno</code> first? Our <code>eval-lexo</code> language doesn't provide a form like <code>letrec</code> for direct recursion, so non-terminating programs require a more complex construction like the Z-combinator (the call-by-value Y-combinator). As a result, the programs that <code>eval-dyno</code> finds before solving our query happen to terminate in <code>eval-lexo</code>.</p>
 
-<h2><a id="append"></a>Relationality for free</h2>
+<h2><a id="append" href="#append">4</a> &nbsp; Relationality for free</h2>
 
 <p><div class=challenge>
 <b>Challenge 4.</b>
@@ -881,7 +881,7 @@ Given enough examples, the simplicity of the recursive solution makes it easier 
 
 <p>While our optimized relational interpreter can both synthesize recursive functions and take advantage of higher-order functions, it struggles with larger programs. The search space grows exponentially with the size of the smallest correct definition of the program to be synthesized. Our current implementation can't synthesize complete recursive programs much larger than <code>append</code>.</p>
 
-<h2><a id="refutation"></a>Taking Test-Driven Development Seriously</h2>
+<h2><a id="refutation" href="#refutation">5</a> &nbsp; Taking Test-Driven Development Seriously</h2>
 
 <p>Test-driven development asks us to write our test cases before we write our programs, so that we can receive immediate feedback on the code we've written.
 
@@ -1022,7 +1022,7 @@ What is wrong with this partial definition of <code>remove</code>?
 
 <p>The debugging steps in this section are tedious to use by hand, but they could provide rich interactive feedback if automatically executed by an interactive development environment. It is interesting that we're able to refute programs without needing the support of a type system (though it is possible to combine a type inferencer, written as a relation, with the interpreter).</p>
 
-<h2><a id="proof-checker"></a>A tiny theorem prover</h2>
+<h2><a id="proof-checker" href="#proof-checker">6</a> &nbsp; A tiny theorem prover</h2>
 
 <p>Here's a tiny proof-checker for propositional logic, written in Racket:</p>
 
@@ -1143,7 +1143,7 @@ How would you solve Challenge 6?
 
 <p>We can also prove commutativity of conjunction where conjunction is encoded with implication.</p>
 
-<h2><a id="scheme-in-scheme"></a>Quines, revisited</h2>
+<h2><a id="scheme-in-scheme" href="#scheme-in-scheme">7</a> &nbsp; Quines, revisited</h2>
 
 <p><div class=challenge>
 <b>Challenge 7.</b>
@@ -1252,7 +1252,7 @@ The outer, relational interpreter must use a first-order representation of envir
 </div>
 <p>Finding quines through the meta-circular evaluator is much slower than the approach we used in section <a href="#quines">2</a>&mdash;this query takes 5 minutes with our current hardware&mdash;but it allows us to generate programs using a new language form without modifying our relational interpreter.</p>
 
-<h2><a id="conclusion"></a>Conclusion</h2>
+<h2><a id="conclusion" href="#conclusion">8</a> &nbsp; Conclusion</h2>
 
 <p>While solving these programming challenges we've shown that a relational interpreter can be used to solve myriad problems: example-based synthesis of recursive programs; refutation and bug-finding for incomplete programs; and generating program inputs with desired properties, using both a single interpreter and multiple interpreters with different semantics. Our success in solving the most difficult of these challenges&mdash;such as synthesis of recursive programs&mdash;is due to optimizations that use convenient properties of purely functional programming languages. The freedom to re-order evaluation, thanks to lack of side effects, is particularly important.</p>
 
