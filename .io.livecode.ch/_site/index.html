@@ -58,8 +58,8 @@ Come up with 99,000 Racket expressions that evaluate to the list <code>(I love y
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 1?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>We could follow Might's approach, and write the 99,000 Racket expressions by hand.
 
@@ -267,8 +267,8 @@ The even better news is that we can use <code>evalo</code> to generate expressio
 <div class=stopthink><p>
 <b>Stop and think:</b>
 Construct a miniKanren query that uses <code>evalo</code> to solve Challenge 1.
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 
 <p>Let's start off small, by generating just a single expression that evaluates to <code>(I love you)</code>:</p>
@@ -343,8 +343,8 @@ Therefore <code>_.1</code> may be replaced by <em>any</em> legal Racket expressi
 <div class=stopthink><p>
 <b>Stop and think:</b>
 Does it matter what search strategy miniKanren uses?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>In fact, the search strategy matters a great deal.<a id="search-bias-paragraph"></a> Searching an infinite tree requires care: for example, depth-first search could get stuck considering an infinite subtree that doesn't contain answers to our query. Even when depth-first search does find answers in an infinite tree, it might find only one kind of answer rather than the variety of answers we're looking for. Our example programs might then only use <code>list</code> and <code>car</code>, but never <code>lambda</code>. Thus it is important that miniKanren uses a complete search, which interleaves the processes of searching different parts of the tree [Kiselyov et al. 2005]. Our interleaving search also biases towards branches which have shown progress in the form of intermediate results, rewarding them with an increased share of the search effort. This bias allows miniKanren's search to investigate promising branches much more deeply than would unbiased complete searches like breadth-first and iterative deepening depth-first search.</p>
 
@@ -385,8 +385,8 @@ Solve McCarthy's exercise by finding a list <code>e</code> that evaluates to its
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 1?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>We could try to construct such a list by hand, either through trial-and-error or through cleverness.
 
@@ -400,8 +400,8 @@ We can once again use <code>evalo</code>, the relational interpreter we describe
 <div class=stopthink><p>
 <b>Stop and think:</b>
 Write a miniKanren query that uses <code>evalo</code> to find an expression <code>e</code> that evaluates to itself.
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>It's actually very simple to write such a query&mdash;just use the query variable as both the first and second arguments to <code>evalo</code> (representing the ``input'' expression and ``output'' value, respectively):</p>
 
@@ -521,8 +521,8 @@ Using unification alone, disequality between terms must be expressed by enumerat
 <div class=stopthink><p>
 <b>Stop and think:</b>
 Write a query that generates a <code>thrine</code>---that is, three distinct expressions <code>p</code>, <code>q</code>, and <code>r</code> such that <code>p</code> evaluates to <code>q</code>, <code>q</code> evaluates to <code>r</code>, and <code>r</code> evaluates to <code>p</code>.
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>Here is the thrine-generating query, which requires a disequality constraint for each pairing of <code>p</code>, <code>q</code>, and <code>r</code>:</p>
 
@@ -554,8 +554,8 @@ To help focus on issues of scope, use a restricted subset of Racket that corresp
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 3?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>We've seen that we can synthesize programs that evaluate to a particular value&mdash;such as <code>(I love you)</code>&mdash;using a relational interpreter. Our solution to this challenge evaluates an unknown expression simultaneously in <em>two</em> relational interpreters: one implementing lexical scope and one implementing dynamic scope.</p>
 
@@ -620,7 +620,8 @@ Relatively simple programs in the language of <code>eval-dyno</code> can express
 <p><div class=stopthink>
 <b>Stop and think:</b>
     Why does the evaluation of this expression never terminate with dynamic scope?
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>After the outermost function application, the subexpression</p>
 <div class="live norun" id="ex-scoping-2">
@@ -647,8 +648,8 @@ We've seen the flexibility of the <code>appendo</code> relation in section <a hr
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 4?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>One solution to this problem would be a Racket-to-miniKanren compiler, or a macro with the same functionality.
 
@@ -698,8 +699,8 @@ Naturally we can run <code>append</code> forwards:</p>
 <div class=stopthink><p>
 <b>Stop and think:</b>
 Will the <code>run 2</code> query return two answers, or will it loop forever?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p><code>run 2</code> actually terminates with these two answers:</p>
 <div class="live norun" id="app-ans">
@@ -715,8 +716,8 @@ The fact that we're synthesizing expressions rather than values also explains a 
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How can we recover the behavior of <code>appendo</code>, where <code>run*</code> proves there is only one list <code>q</code> that when prepended to <code>(d e)</code> produces <code>(a b c d e)</code>?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>The smallest of changes will do: just add a quote before the unquoted logic variable <code>q</code>. For each value, there is only one quotation expression that evaluates to that value.</p>
 <div class="live" id="ev-appendo-3" data-lib="evalo-standard">
@@ -837,8 +838,8 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How can we synthesize a more general version of <code>append</code>?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>Adding a couple more usage examples helps us find a more general definition.</p>
 
@@ -924,8 +925,8 @@ How can we determine that we've already made a mistake?
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 5?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>Using our relational interpreter we actually <em>can</em> run the test suite with our incomplete program, by representing any holes with (unquoted) logic variables.
 <div class="live hidden" id="evalo-optimized-f">
@@ -956,8 +957,8 @@ How would you solve Challenge 5?
 <div class=stopthink><p>
 <b>Stop and think:</b>
 We know our program is wrong.  How do we figure out <em>where</em> it went wrong?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>By attempting to satisfy tests individually, we can get a hint at the problem.</p>
 
@@ -1019,8 +1020,8 @@ the clause should produce the empty list, not a pair.  With this insight, we can
 <div class=stopthink><p>
 <b>Stop and think:</b>
 What is wrong with this partial definition of <code>remove</code>?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>The problematic right-hand-side <code>(cons (car ls) ,B)</code> always constructs a pair containing the <code>car</code> of <code>ls</code> as the first element, even if the <code>car</code> contains the symbol we wish to remove.  In other words, there is never a recursive call on the <code>car</code> of <code>ls</code>.  If we look at the list passed to <code>remove</code> in the failing test case, we notice that its first element is itself a list containing the item we'd like to remove.  If the first element of <code>ls</code> is a list, we need to process it before including it in our result.  Adding a \mbox{\schemeresult|[(pair? (car ls)) ...]|} clause after the <code>[(null? ls) ...]</code> clause allows our test to be satisfied.</p>
 
@@ -1073,8 +1074,8 @@ Write a tiny theorem prover for the logic of the proof checker, <code>proof?</co
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 6?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>How might we write our tiny prover? A simple (though inefficient) algorithm might use a goal-directed, breadth-first search, which is complete over infinite trees. But miniKanren <em>already</em> implements a complete, goal directed search! What happens if we just run the proof checker in the relational interpreter we've used for the previous challenges?</p>
 
@@ -1166,8 +1167,8 @@ We could extend the interpreter to add it, but is there another way?</p>
 <div class=stopthink><p>
 <b>Stop and think:</b>
 How would you solve Challenge 7 without modifying the relational interpreter?
-<div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
-</p></div>
+</p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
+</div>
 
 <p>Unlike <code>append</code>, <code>quasiquote</code> can't be implemented as a function, since it does not directly evaluate its argument, but rather interprets its argument to find <code>unquote</code> forms. Thus we can't simply define <code>quasiquote</code> in the interpreter with <code>letrec</code>.
 
