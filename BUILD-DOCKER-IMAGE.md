@@ -1,6 +1,6 @@
 # Building the Docker image
 
-This file explains how to build and optionally archive the Docker image `artifact35-auas7pp` if you don't already have one.  Read `SETUP-DOCKER-EVAL.md` to use an existing image.
+This file explains how to build and optionally archive the Docker image `artifact35-auas7pp` if you don't already have one.  Read [SETUP-DOCKER-EVAL.md](https://github.com/gregr/icfp2017-artifact-auas7pp/blob/master/SETUP-DOCKER-EVAL.md) to use an existing image.
 
 
 ## Install Docker
