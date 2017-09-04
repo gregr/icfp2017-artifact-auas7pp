@@ -20,6 +20,8 @@ If you'd like to use Docker, read the setup instructions: `SETUP-DOCKER-EVAL.md`
 
 To run with from this repo directly with Chez Scheme installed, make sure to first `cd src`.
 
+If you'd like to install Chez yourself, you can find it here, with build instructions: https://cisco.github.io/ChezScheme/#get.  You can also try to figure out how to install it by reading our `Dockerfile`.
+
 
 ### Review the challenge files
 
