@@ -18,11 +18,11 @@ You can also follow along with the paper by running the challenge examples local
 
 ### Setup for local running
 
-If you'd like to use Docker, read the setup instructions: `SETUP-DOCKER-EVAL.md`.
+If you'd like to use Docker, read [SETUP-DOCKER-EVAL.md](https://github.com/gregr/icfp2017-artifact-auas7pp/blob/master/SETUP-DOCKER-EVAL.md).
 
 To run with from this repo directly with Chez Scheme installed, make sure to first `cd src`.
 
-If you'd like to install Chez yourself, you can find it here, with build instructions: https://cisco.github.io/ChezScheme/#get.  You can also try to figure out how to install it by reading our `Dockerfile`.
+If you'd like to install Chez yourself, you can find it here, with build instructions: https://cisco.github.io/ChezScheme/#get.  You can also try to figure out how to install it by reading our [Dockerfile](https://github.com/gregr/icfp2017-artifact-auas7pp/blob/master/Dockerfile).
 
 
 ### Review the challenge files
