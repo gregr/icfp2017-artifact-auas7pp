@@ -1,10 +1,10 @@
-# Functional Pearl: A Unified Approach to Solving Seven Programming Problems
+# Setting up Docker for artifact evaluation
 
 This file describes how to set up Docker for artifact evaluation, with instructions for running and validating the tests once you're in the image.
 
 It's assumed that you have a pre-built image available for use.  If you don't, you can obtain it here: https://dl.acm.org/ft_gateway.cfm?id=3110252&type=zip&path=%2F3120000%2F3110252%2Fsupp%2Ficfp17%2Dmain35%2Ds%2Ezip&supp=1&dwn=1&CFID=979103363&CFTOKEN=46849167
 
-You can also build it yourself.
+You can also build it yourself by following the instructions in: `BUILD-DOCKER-IMAGE.md`
 
 
 ## Getting started
