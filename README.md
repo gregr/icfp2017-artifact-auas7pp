@@ -13,8 +13,10 @@ http://io.livecode.ch/learn/namin/icfp2017-artifact-auas7pp
 The livecode.io miniKanren tutorial:
 http://io.livecode.ch/learn/webyrd/webmk
 
+You can also follow along with the paper by running the challenge examples locally.  You can either install Chez Scheme and clone this repo, or use the Docker image.
 
-You can also follow along with the paper by running the challenge examples on your own machine.  You can either install Chez Scheme and clone this repo, or use the Docker image.
+
+### Setup for local running
 
 If you'd like to use Docker, read the setup instructions: `SETUP-DOCKER-EVAL.md`.
 
