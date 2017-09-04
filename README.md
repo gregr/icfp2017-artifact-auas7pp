@@ -2,6 +2,16 @@
 
 http://icfp17.sigplan.org/event/icfp-2017-papers-functional-pearl-a-unified-approach-to-solving-seven-programming-problems
 
+The paper and pre-built Docker image:
+http://dl.acm.org/citation.cfm?id=3110252&CFID=976617079
+
+The livecode.io version of the paper:
+http://io.livecode.ch/learn/namin/icfp2017-artifact-auas7pp
+
+The livecode.io miniKanren tutorial:
+http://io.livecode.ch/learn/webyrd/webmk
+
+
 This file explains how to build and optionally archive the Docker image `artifact35-auas7pp` if you don't already have one.  Read `ArtifactOverview.md` to use an existing image.
 
 
