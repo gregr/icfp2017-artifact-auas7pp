@@ -104,7 +104,7 @@ an embedded domain specific language for constraint logic programming [Byrd and 
          (cons a res))])))
 </div>
 
-<p>This two-argument <code>append</code> function can now be translated into the three-argument \scheme{appendo} relation in miniKanren:</p>
+<p>This two-argument <code>append</code> function can now be translated into the three-argument <code>appendo</code> relation in miniKanren:</p>
 
 <div class="live norun" id="appendo">
 (define appendo
@@ -207,7 +207,7 @@ A simple <code>conde</code> expression is
 
 with the two clauses <code>((== 3 x) (== 4 y))</code> and <code>((== 5 x))</code>.
 
-The first clause is a conjunction of \mbox{<code>(== 3 x)</code>} and \mbox{<code>(== 4 y)</code>}.
+The first clause is a conjunction of <code>(== 3 x)</code> and <code>(== 4 y)</code>.
 
 In this case both clauses succeed: the first clause associates <code>x</code> with <code>3</code> and <code>y</code> with <code>4</code>; the second clause produces a distinct answer that associates <code>x</code> with <code>5</code> but doesn't constrain <code>y</code>.
 
@@ -223,7 +223,7 @@ Since both clauses succeed, the entire <code>conde</code> expression succeeds tw
 
 <p>Here <code>run*</code> introduces the query variable <code>q</code>, then evaluates its body as a conjunction of goals, returning a list of all the answers it produces.  Under the hood, miniKanren uses a search that traverses the tree of conjunctions and disjunctions constructed by <code>fresh</code> and <code>conde</code>.
 
-Each answer consists of a list of values unified with query variables, followed by any additional side conditions introduced by lazy constraints.  In this case, there is only a single answer unifying a single query variable to a value that happens to be a list, resulting in a triply-nested list.  Here the single answer found unifies <code>q</code> with <code>(a b c d e)</code>. If we wanted miniKanren to stop searching after producing the first answer rather than continuing until it can prove there are no more, we could use \mbox{<code>run 1</code>} rather than <code>run*</code>.</p>
+Each answer consists of a list of values unified with query variables, followed by any additional side conditions introduced by lazy constraints.  In this case, there is only a single answer unifying a single query variable to a value that happens to be a list, resulting in a triply-nested list.  Here the single answer found unifies <code>q</code> with <code>(a b c d e)</code>. If we wanted miniKanren to stop searching after producing the first answer rather than continuing until it can prove there are no more, we could use <code>run 1</code> rather than <code>run*</code>.</p>
 
 <h3><a id="a-relational-interpreter" href="#a-relational-interpreter">1.2</a> &nbsp; Loving Lists via a Relational Interpreter</h3>
 
@@ -426,7 +426,7 @@ The single answer returned by our query represents <em>infinitely many</em> indi
 
 <p>We've found a trivial expression that evaluates to itself.
 
-However, the actual challenge is to find a \emph{list} that evaluates to itself.
+However, the actual challenge is to find a <em>list</em> that evaluates to itself.
 
 If we replace the <code>run 1</code> in our query with <code>run 3</code>, we get back two more trivial quines: <code>#t</code> and <code>#f</code>, the self-evaluating Boolean constants in Racket.</p>
 
@@ -782,7 +782,7 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
     '(5 . 6)))
 </div>
 
-<p>Within the body of the <code>let</code> we would first evaluate the <code>lambda</code> expression to a closure, then <code>x</code> to <code>7</code>, followed by the closure body <code>(cons a d)</code> where <code>d</code> is bound to <code>7</code> and <code>a</code> is still unknown. Only if those succeed would we start guessing terms for <code>e</code>.  In this case the query fails before we make any guesses. Evaluating the closure body produces a pair whose <code>cdr</code> is <code>7</code>, which cannot possibly fit our expected result of \schemeresult|(5 . 6)|, whose <code>cdr</code> is <code>6</code>.</p>
+<p>Within the body of the <code>let</code> we would first evaluate the <code>lambda</code> expression to a closure, then <code>x</code> to <code>7</code>, followed by the closure body <code>(cons a d)</code> where <code>d</code> is bound to <code>7</code> and <code>a</code> is still unknown. Only if those succeed would we start guessing terms for <code>e</code>.  In this case the query fails before we make any guesses. Evaluating the closure body produces a pair whose <code>cdr</code> is <code>7</code>, which cannot possibly fit our expected result of <code>(5 . 6)</code>, whose <code>cdr</code> is <code>6</code>.</p>
 
 <p>Because we are implementing a purely functional language, we can perform these reorderings without changing a program's behavior.  If evaluating <code>e</code> could produce side effects, such as mutating the value of <code>x</code>, we would have to be more careful.</p>
 
@@ -791,7 +791,7 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
 <ul>
     <li>To reduce uninformed guessing when encountering branches, we defer invoking the goals constructed by some uses of <code>conde</code> when it seems likely that more than one clause will succeed.  Deferred goals are queued up to be retried later, after all informed guesses have been made, with the hope of having learned more useful information by the time we retry.</li>
 
-    <li>Though we continue to support a complete search, we first try a depth-limited search, which prunes search branches that get very deep.  These branches are often unpromising.  If no answers are found, we fall back on the unlimited, complete search. The bias in our search described on page~\pageref{search-bias-paragraph} is also important for the remaining challenges; a simple iterative deepening search won't work.</li>
+    <li>Though we continue to support a complete search, we first try a depth-limited search, which prunes search branches that get very deep.  These branches are often unpromising.  If no answers are found, we fall back on the unlimited, complete search. The bias in our search described <a href="#search-bias-paragraph">earlier</a> is also important for the remaining challenges; a simple iterative deepening search won't work.</li>
 
     <li>To greatly reduce the expense of searching for useful conditional expressions, we restrict conditions to expressions that evaluate to Boolean constants <code>#t</code> and <code>#f</code> (as opposed to other ``true'' Racket values, such as `<code>5</code>').</li>
 
@@ -815,7 +815,7 @@ This query <em>simultaneously</em> performs code synthesis and bidirectional eva
 
 <p>Because the search simply looks for any definition that works, a simple way to satisfy the constraints is to simply return our example output verbatim.  This is why we see our expected second result embedded directly in the definition.  How do we get around this?</p>
 
-<p>One solution is to prohibit the definition from mentioning our example data directly.  The constraint \mbox{<code>(absento t1 t2)</code>} prevents term <code>t1</code> from appearing anywhere in term <code>t2</code>.</p>
+<p>One solution is to prohibit the definition from mentioning our example data directly.  The constraint <code>(absento t1 t2)</code> prevents term <code>t1</code> from appearing anywhere in term <code>t2</code>.</p>
 
 <p class="footnote">The miniKanren implementation we use for this pearl restricts <code>t1</code> to be a literal symbol or number rather than a term. Other implementations can handle the general version of the constraint.</p>
 
@@ -1023,7 +1023,7 @@ What is wrong with this partial definition of <code>remove</code>?
 </p><div style="text-align:center;"><img alt="stop" width=40 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Vienna_Convention_road_sign_B2a.svg/240px-Vienna_Convention_road_sign_B2a.svg.png"></div>
 </div>
 
-<p>The problematic right-hand-side <code>(cons (car ls) ,B)</code> always constructs a pair containing the <code>car</code> of <code>ls</code> as the first element, even if the <code>car</code> contains the symbol we wish to remove.  In other words, there is never a recursive call on the <code>car</code> of <code>ls</code>.  If we look at the list passed to <code>remove</code> in the failing test case, we notice that its first element is itself a list containing the item we'd like to remove.  If the first element of <code>ls</code> is a list, we need to process it before including it in our result.  Adding a \mbox{\schemeresult|[(pair? (car ls)) ...]|} clause after the <code>[(null? ls) ...]</code> clause allows our test to be satisfied.</p>
+<p>The problematic right-hand-side <code>(cons (car ls) ,B)</code> always constructs a pair containing the <code>car</code> of <code>ls</code> as the first element, even if the <code>car</code> contains the symbol we wish to remove.  In other words, there is never a recursive call on the <code>car</code> of <code>ls</code>.  If we look at the list passed to <code>remove</code> in the failing test case, we notice that its first element is itself a list containing the item we'd like to remove.  If the first element of <code>ls</code> is a list, we need to process it before including it in our result.  Adding a <code>[(pair? (car ls)) ...]</code> clause after the <code>[(null? ls) ...]</code> clause allows our test to be satisfied.</p>
 
 <p>The debugging steps in this section are tedious to use by hand, but they could provide rich interactive feedback if automatically executed by an interactive development environment. It is interesting that we're able to refute programs without needing the support of a type system (though it is possible to combine a type inferencer, written as a relation, with the interpreter).</p>
 
