@@ -5,7 +5,7 @@ http://icfp17.sigplan.org/event/icfp-2017-papers-functional-pearl-a-unified-appr
 Try out the examples while reading the paper.
 
 The paper and pre-built Docker image:
-http://dl.acm.org/citation.cfm?id=3110252&CFID=976617079
+https://dl.acm.org/citation.cfm?id=3110252
 
 The livecode.io version of the paper:
 http://io.livecode.ch/learn/namin/icfp2017-artifact-auas7pp
