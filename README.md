@@ -7,10 +7,10 @@ Try out the examples while reading the paper.
 The paper and pre-built Docker image:
 https://dl.acm.org/citation.cfm?id=3110252
 
-The livecode.io version of the paper:
+The io.livecode.ch version of the paper:
 http://io.livecode.ch/learn/namin/icfp2017-artifact-auas7pp
 
-The livecode.io miniKanren tutorial:
+The io.livecode.ch miniKanren tutorial:
 http://io.livecode.ch/learn/webyrd/webmk
 
 You can also follow along with the paper by running the challenge examples locally.  You can either install Chez Scheme and clone this repo, or use the Docker image.
