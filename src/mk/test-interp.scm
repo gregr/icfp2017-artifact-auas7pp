@@ -1,6 +1,7 @@
 (load "test-check.scm")
 (load "mk.scm")
 
+;; eval-expo relies on the mutable variable lookupo as a helper function.
 (define eval-expo
   (lambda (exp env val)
     (conde
@@ -25,6 +26,7 @@
          (=/= y x)
          (not-in-envo x rest))))))
 
+;; MUTABLE!
 (define lookupo
   (lambda (x env t)
     (conde
@@ -49,7 +51,9 @@
       (lambda (z) z))
      (sym _.0))))
 
-(define lookupo
+;; Mutate lookupo, the evalo tests after this rely on this new version.
+(set!
+  lookupo
   (lambda (x env t)
     (fresh (rest y v)
       (== `((,y . ,v) . ,rest) env)
