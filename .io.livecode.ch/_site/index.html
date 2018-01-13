@@ -560,12 +560,91 @@ How would you solve Challenge 3?
 <p>We've seen that we can synthesize programs that evaluate to a particular value&mdash;such as <code>(I love you)</code>&mdash;using a relational interpreter. Our solution to this challenge evaluates an unknown expression simultaneously in <em>two</em> relational interpreters: one implementing lexical scope and one implementing dynamic scope.</p>
 
 <p>We need only a few language forms to reveal distinctions between the two scoping disciplines: lambda, variable reference, function application, and numeric literals for the return values specified in the challenge.
-<!--Figure~\ref{fig:interp} shows the big-step operational semantics for the lexically-scoped version of this minimal language, along with the corresponding relational interpreter in miniKanren.-->
+Figure <a href="#fig-interp">1</a> shows the big-step operational semantics for the lexically-scoped version of this minimal language, along with the corresponding relational interpreter in miniKanren.
 </p>
 
-<!--In the semantics, $\rho \vdash e \Rightarrow v$ means the expression $e$ evaluates to the value $v$ in the environment $\rho$.
-%
-The metavariable $n$ represents any number, $v$ any value (which includes numbers and closures), $x$ any identifier, $e$ any expression, and $\rho$ any environment (a mapping from identifiers to values).-->
+<a name="fig-interp">
+<table width="100%">
+
+<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><pre>
+(define (eval-expr-lex<sup>o</sup> expr env out)
+  (cond<sup>e</sup>
+</pre></td>
+</tr>
+
+<tr>
+<td>$$\frac
+          { }
+          {\rho \vdash n \Rightarrow n}
+$$</td>
+<td valign="middle"><span style="font-variant: small-caps;">const</span></td>
+<td><pre>
+    [(numbero expr) (== expr out)]
+</pre></td>
+</tr>
+
+<tr>
+<td>$$\frac
+          {\textrm{lambda} \not\in \rho}
+          {\rho \vdash \textrm{(lambda ($x$) $e$)} \Rightarrow \textrm{(closure $x$ $e$ $\rho$)}}
+$$</td>
+<td valign="middle"><span style="font-variant: small-caps;">abs</span></td>
+<td><pre>
+    [(fresh (x body)
+       (== `(lambda (,x) ,body) expr)
+       (symbolo x)
+       (== `(closure ,x ,body ,env) out)
+       (not-in-envo 'lambda env))]
+</pre></td>
+</tr>
+
+<tr>
+<td>$$\frac
+          {\rho(x) = v}
+          {\rho \vdash x \Rightarrow v}
+$$</td>
+<td valign="middle"><span style="font-variant: small-caps;">ref</span></td>
+<td><pre>
+    [(symbolo expr) (lookupo expr env out)]
+</pre></td>
+</tr>
+
+<tr>
+<td>$$\frac
+          {\rho \vdash e_1 \Rightarrow \textrm{(closure $x$ $e_c$ $\rho_c$)} \\\\
+           \rho \vdash e_2 \Rightarrow v_2 \\\\
+           \rho_c,x \mapsto v_2 \vdash e_c \Rightarrow v_3}
+          {\rho \vdash \textrm{($e_1$ $e_2$)} \Rightarrow v_3}
+$$</td>
+<td valign="middle"><span style="font-variant: small-caps;">app</span></td>
+<td><pre>
+    [(fresh (e1 e2 val x body cenv new-env)
+       (== `(,e1 ,e2) expr)
+       (eval-expr-lexo e1 env
+         `(closure ,x ,body ,cenv))
+       (eval-expr-lexo e2 env val)
+       (ext-envo x val cenv new-env)
+       (eval-expr-lexo body new-env out))]
+</pre></td>
+</tr>
+
+<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><pre>
+     )))
+</pre></td>
+</tr>
+
+</table>
+<div>Fig. 1. Correspondence between inference rules for the call-by-value λ-calculus (with lexical scope) and the evaluation relation.</div>
+</a>
+
+<p>In the semantics, \(\rho \vdash e \Rightarrow v\) means the expression \(e\) evaluates to the value \(v\) in the environment \(\rho\).
+The metavariable \(n\) represents any number, \(v\) any value (which includes numbers and closures), \(x\) any identifier, \(e\) any expression, and \(\rho\) any environment (a mapping from identifiers to values).</p>
 
 <p>The evaluation judgement is implemented as the miniKanren relation <code>eval-expr-lexo</code>. In our queries we'll use the relation <code>eval-lexo</code> which just calls <code>eval-expr-lexo</code> with the empty environment.
 
